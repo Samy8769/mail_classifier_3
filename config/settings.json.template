@@ -49,8 +49,18 @@
         "name": "processus",
         "prompt_file": "prompt_mail_processus.txt",
         "regles_file": "regles_mail_processus.txt"
+      },
+      {
+        "name": "qualite",
+        "prompt_file": "prompt_mail_qualite.txt",
+        "regles_file": "regles_mail_qualité.txt",
+        "dependencies": ["type", "projet"]
       }
     ]
+  },
+  "database": {
+    "enabled": true,
+    "db_path": "mail_classifier.db"
   },
   "state": {
     "enabled": true,

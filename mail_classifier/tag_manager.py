@@ -17,18 +17,27 @@ class TagManager:
     """
 
     # Valid classification axes
-    VALID_AXES = ['type', 'projet', 'fournisseur', 'equipement', 'processus']
+    VALID_AXES = [
+        'type', 'projet', 'fournisseur', 'equipement', 'processus',
+        'qualite', 'jalons', 'anomalies', 'nrb'
+    ]
 
     # Prefix mapping for auto-detection
     PREFIX_MAP = {
         'T_': 'type',
-        'S_': 'type',  # Status tags
+        'S_': 'type',      # Status tags
         'P_': 'projet',
-        'A_': 'projet',  # Affairs
-        'C_': 'projet',  # Clients
+        'A_': 'projet',    # Affairs
+        'C_': 'projet',    # Clients
         'F_': 'fournisseur',
-        'E_': 'equipement',
-        'Proc_': 'processus'
+        'EQT_': 'equipement',
+        'EQ_': 'equipement',
+        'E_': 'processus',
+        'TC_': 'processus',
+        'Q_': 'qualite',
+        'J_': 'jalons',
+        'AN_': 'anomalies',
+        'NRB_': 'nrb',
     }
 
     def __init__(self, db: DatabaseManager):
@@ -99,16 +108,11 @@ class TagManager:
 
     def _detect_axis_from_tag(self, tag_name: str) -> Optional[str]:
         """Auto-detect axis from tag prefix."""
-        # Check single-char prefixes (T_, P_, etc.)
-        if len(tag_name) >= 2 and tag_name[1] == '_':
-            prefix = tag_name[:2]
-            if prefix in self.PREFIX_MAP:
-                return self.PREFIX_MAP[prefix]
-
-        # Check multi-char prefixes (Proc_)
-        for prefix, axis in self.PREFIX_MAP.items():
+        # Check multi-char prefixes first (EQT_, NRB_, AN_, TC_, EQ_)
+        # Sorted by length descending to match longest prefix first
+        for prefix in sorted(self.PREFIX_MAP.keys(), key=len, reverse=True):
             if tag_name.startswith(prefix):
-                return axis
+                return self.PREFIX_MAP[prefix]
 
         return None
 
