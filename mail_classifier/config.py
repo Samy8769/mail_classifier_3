@@ -6,8 +6,12 @@ Handles loading and validation of JSON configuration, including environment vari
 import os
 import re
 import json
+from pathlib import Path
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Any
+from .logger import get_logger
+
+logger = get_logger('config')
 
 
 class ConfigError(Exception):
@@ -31,7 +35,7 @@ class Config:
 
     def __init__(self, config_data: Dict[str, Any], config_dir: str):
         """
-        Initialize configuration from parsed YAML data.
+        Initialize configuration from parsed JSON data.
 
         Args:
             config_data: Dictionary containing configuration
@@ -139,8 +143,12 @@ class Config:
                 dependencies=axis_data.get('dependencies', [])
             )
 
-            # Load prompt file
-            prompt_path = os.path.join(self.config_dir, axis.prompt_file)
+            # Load prompt file (with path traversal protection)
+            prompt_path = (Path(self.config_dir) / axis.prompt_file).resolve()
+            config_dir_abs = Path(self.config_dir).resolve()
+            if not str(prompt_path).startswith(str(config_dir_abs)):
+                raise ConfigError(f"Path traversal detected in prompt_file: {axis.prompt_file}")
+
             try:
                 with open(prompt_path, 'r', encoding='utf-8') as f:
                     axis.prompt = f.read()
@@ -153,15 +161,16 @@ class Config:
             # axis.rules will be populated by categorizer using db.reconstruct_full_rules()
             # For backward compatibility, optionally load from file if specified
             if axis.regles_file and self.database.get('enabled', False) is False:
-                rules_path = os.path.join(self.config_dir, axis.regles_file)
+                rules_path = (Path(self.config_dir) / axis.regles_file).resolve()
+                if not str(rules_path).startswith(str(config_dir_abs)):
+                    raise ConfigError(f"Path traversal detected in regles_file: {axis.regles_file}")
                 try:
                     with open(rules_path, 'r', encoding='utf-8') as f:
                         axis.rules = f.read()
                 except FileNotFoundError:
-                    # Not an error in v3.0 - rules come from DB
-                    pass
-                except Exception:
-                    pass
+                    logger.info(f"Rules file not found (expected when DB enabled): {rules_path}")
+                except Exception as e:
+                    logger.warning(f"Error loading rules file {rules_path}: {e}")
 
             loaded_axes.append(axis)
 
@@ -178,7 +187,7 @@ class Config:
         if not api_key or api_key.startswith('${'):
             raise ConfigError(
                 "API key not configured. Set PARADIGM_API_KEY environment variable "
-                "or update api_key in settings.yaml"
+                "or update api_key in settings.json"
             )
 
         if not self.api.get('model'):

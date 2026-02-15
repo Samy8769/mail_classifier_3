@@ -1,6 +1,6 @@
 """
 API client module for Paradigm/OpenAI-compatible API.
-Handles API calls with configuration from YAML.
+Handles API calls with configuration from JSON.
 
 Extracted from lines 15-26, 197-218 of original mail_classification.py
 """
@@ -10,6 +10,9 @@ import ssl
 import openai
 import httpx
 from typing import Dict, Any
+from .logger import get_logger
+
+logger = get_logger('api_client')
 
 
 class APIError(Exception):
@@ -87,6 +90,11 @@ class ParadigmAPIClient:
         Raises:
             APIError: If API call fails
         """
+        if not prompt or not isinstance(prompt, str):
+            raise APIError("Invalid prompt: expected non-empty string")
+        if not content and not isinstance(content, str):
+            raise APIError("Invalid content: expected a string")
+
         try:
             messages = [
                 {"role": "system", "content": prompt},
@@ -161,7 +169,7 @@ class ParadigmAPIClient:
         except Exception as e:
             # If multilingual-e5-large not available, try fallback
             if "multilingual-e5-large" in str(e) and model == "multilingual-e5-large":
-                print(f"⚠ Warning: multilingual-e5-large not available, trying text-embedding-ada-002")
+                logger.warning("multilingual-e5-large not available, trying text-embedding-ada-002")
                 try:
                     response = self.client.embeddings.create(
                         model="text-embedding-ada-002",

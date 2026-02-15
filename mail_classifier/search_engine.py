@@ -6,6 +6,9 @@ High-level interface for searching emails by meaning.
 from typing import List, Dict, Optional
 from datetime import datetime
 import json
+from .logger import get_logger
+
+logger = get_logger('search_engine')
 
 
 class SearchEngine:
@@ -14,7 +17,8 @@ class SearchEngine:
     Orchestrates vector search, result ranking, and email retrieval.
     """
 
-    def __init__(self, vector_store, db, email_client=None):
+    def __init__(self, vector_store: 'VectorStore', db: 'DatabaseManager',
+                 email_client: Optional['EmailClient'] = None):
         """
         Args:
             vector_store: VectorStore instance
@@ -40,8 +44,8 @@ class SearchEngine:
         Returns:
             List of email results with metadata and relevance scores
         """
-        print(f"\n🔍 Searching for: '{query}'")
-        print("=" * 60)
+        logger.info(f"Searching for: '{query}'")
+        logger.info("=" * 60)
 
         # Vector similarity search (returns top_k * 2 to allow for deduplication)
         chunk_results = self.vector_store.similarity_search(
@@ -50,7 +54,7 @@ class SearchEngine:
         )
 
         if not chunk_results:
-            print("No matching chunks found")
+            logger.info("No matching chunks found")
             return []
 
         # Deduplicate by email_id and rank by best chunk score
@@ -70,12 +74,12 @@ class SearchEngine:
         ranked_emails = sorted(email_scores.items(), key=lambda x: x[1], reverse=True)
         ranked_emails = ranked_emails[:top_k]
 
-        print(f"\n📊 Found {len(chunk_results)} chunks → {len(ranked_emails)} unique emails")
+        logger.info(f"Found {len(chunk_results)} chunks -> {len(ranked_emails)} unique emails")
 
         # Apply filters if specified
         if filters:
             ranked_emails = self._apply_filters(ranked_emails, filters)
-            print(f"📋 After filtering: {len(ranked_emails)} emails")
+            logger.info(f"After filtering: {len(ranked_emails)} emails")
 
         # Retrieve full email data
         results = []
@@ -120,7 +124,7 @@ class SearchEngine:
         # Log search to database
         self._log_search(query, results, top_k)
 
-        print(f"✓ Returning {len(results)} results")
+        logger.info(f"Returning {len(results)} results")
         return results
 
     def _apply_filters(self, ranked_emails: List[tuple], filters: Dict) -> List[tuple]:
@@ -207,7 +211,7 @@ class SearchEngine:
             self.db.connection.commit()
         except Exception as e:
             # Don't fail search if logging fails
-            print(f"⚠ Warning: Failed to log search: {e}")
+            logger.warning(f"Failed to log search: {e}")
 
     def get_search_history(self, limit: int = 10) -> List[Dict]:
         """
@@ -232,7 +236,7 @@ class SearchEngine:
             if entry['results']:
                 try:
                     entry['results'] = json.loads(entry['results'])
-                except:
+                except (json.JSONDecodeError, TypeError, ValueError):
                     entry['results'] = []
             history.append(entry)
 
@@ -250,7 +254,7 @@ class SearchEngine:
             Email data from Outlook or None
         """
         if not self.email_client:
-            print("⚠ Email client not available")
+            logger.warning("Email client not available")
             return None
 
         email_data = self.db.get_email(email_id)
@@ -265,7 +269,7 @@ class SearchEngine:
             # For now, return database data
             return email_data
         except Exception as e:
-            print(f"✗ Error retrieving from Outlook: {e}")
+            logger.error(f"Error retrieving from Outlook: {e}")
             return email_data
 
     def get_similar_emails(self, email_id: int, top_k: int = 5) -> List[Dict]:

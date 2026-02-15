@@ -43,7 +43,8 @@ class TagValidator:
     # All known prefixes sorted by length descending (longest match first)
     KNOWN_PREFIXES = sorted(PREFIX_TO_AXIS.keys(), key=len, reverse=True)
 
-    def __init__(self, config, api_client, db):
+    def __init__(self, config: 'Config', api_client: 'ParadigmAPIClient',
+                 db: 'DatabaseManager'):
         """
         Args:
             config: Configuration object
@@ -350,14 +351,15 @@ Si les tags sont INVALIDES, réponds : "INVALID: [raison]" suivi de la liste cor
             allowed_tags[axis] = [t['tag_name'] for t in db_tags]
 
             # Get multiplicity from first tag metadata (if available)
-            if db_tags and db_tags[0]['tag_metadata']:
+            if db_tags and db_tags[0].get('tag_metadata'):
                 try:
                     metadata = db_tags[0]['tag_metadata']
-                    if isinstance(metadata, dict) and 'multiplicity' in metadata:
-                        multiplicity_rules[axis] = metadata['multiplicity']
+                    if isinstance(metadata, dict):
+                        multiplicity_rules[axis] = metadata.get('multiplicity', '0..*')
                     else:
                         multiplicity_rules[axis] = '0..*'
-                except Exception:
+                except (TypeError, KeyError) as e:
+                    logger.debug(f"Error reading multiplicity for axis '{axis}': {e}")
                     multiplicity_rules[axis] = '0..*'
             else:
                 multiplicity_rules[axis] = '0..*'
@@ -454,7 +456,7 @@ Si les tags sont INVALIDES, réponds : "INVALID: [raison]" suivi de la liste cor
 
     # ==================== Combined Pipeline ====================
 
-    def validate_and_correct(self, email_id,
+    def validate_and_correct(self, email_id: str,
                             email_summaries: str,
                             proposed_tags: List[str]) -> List[str]:
         """
@@ -519,7 +521,8 @@ Si les tags sont INVALIDES, réponds : "INVALID: [raison]" suivi de la liste cor
                 if isinstance(section_data, dict):
                     return section_data.get(key, default)
             return default
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Error accessing config {section}.{key}: {e}")
             return default
 
     # ==================== Quick Format Validation ====================

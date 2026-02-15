@@ -1,5 +1,5 @@
 """
-Main entry point for mail_classifier CLI v2.0.
+Main entry point for mail_classifier CLI v3.1.
 Orchestrates all components and provides enhanced command-line interface.
 
 Features:
@@ -33,7 +33,7 @@ from mail_classifier import cli_commands
 def create_parser():
     """Create argument parser with subcommands."""
     parser = argparse.ArgumentParser(
-        description='Mail Classifier v2.0 - AI-Powered Email Classification & Search',
+        description='Mail Classifier v3.1 - AI-Powered Email Classification & Search',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         add_help=False
     )
@@ -298,7 +298,7 @@ def initialize_v2_components(config):
         
         # Validator
         if config.validation.get('enabled', True) and db:
-            validator = TagValidator(config,db, api_client)
+            validator = TagValidator(config, api_client, db)
 
         # Vector store and search
         if config.embeddings.get('enabled', False) and db:
@@ -489,8 +489,8 @@ def main():
 
     # Handle special flags
     if args.version:
-        print("Mail Classifier v2.0")
-        print("Enhanced with semantic search, chunking, and database features")
+        print("Mail Classifier v3.1")
+        print("AI multi-axis classification with semantic search and database features")
         sys.exit(0)
 
     if args.help or args.command is None:

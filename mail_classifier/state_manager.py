@@ -7,6 +7,9 @@ import os
 import json
 from datetime import datetime
 from typing import Dict, List, Optional, Any
+from .logger import get_logger
+
+logger = get_logger('state_manager')
 
 
 class StateManager:
@@ -40,7 +43,7 @@ class StateManager:
             with open(self.cache_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"Warning: Could not load cache: {e}")
+            logger.warning(f"Could not load cache: {e}")
             return {}
 
     def _save_cache(self):
@@ -52,7 +55,7 @@ class StateManager:
             with open(self.cache_file, 'w', encoding='utf-8') as f:
                 json.dump(self.cache, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            print(f"Warning: Could not save cache: {e}")
+            logger.warning(f"Could not save cache: {e}")
 
     def is_conversation_processed(self, conversation_id: str) -> bool:
         """
@@ -108,7 +111,7 @@ class StateManager:
                     continue
             return False
         except Exception as e:
-            print(f"Warning: Could not verify with Outlook: {e}")
+            logger.warning(f"Could not verify with Outlook: {e}")
             return False
 
     def cache_conversation(self, conversation_id: str, categories: List[str]):
@@ -147,4 +150,4 @@ class StateManager:
         """Clear all cached data."""
         self.cache = {}
         self._save_cache()
-        print("Cache cleared.")
+        logger.info("Cache cleared.")
