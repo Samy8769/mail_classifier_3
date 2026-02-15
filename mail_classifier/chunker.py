@@ -6,15 +6,16 @@ Uses character-based token approximation (no tiktoken dependency).
 
 import re
 from typing import List, Dict, Tuple
+from .constants import CHARS_PER_TOKEN, TOKEN_SAFETY_FACTOR, DEFAULT_MAX_TOKENS
 
 
 class EmailChunker:
     """
     Intelligent email chunking that respects token limits.
-    Uses approximation: 1 token ≈ 4 characters (with 10% safety margin).
+    Uses approximation: 1 token ~ 4 characters (with 10% safety margin).
     """
 
-    def __init__(self, max_tokens: int = 32000, overlap_tokens: int = 200):
+    def __init__(self, max_tokens: int = DEFAULT_MAX_TOKENS, overlap_tokens: int = 200):
         """
         Args:
             max_tokens: Maximum tokens per chunk (default 32K for large context models)
@@ -23,9 +24,9 @@ class EmailChunker:
         self.max_tokens = max_tokens
         self.overlap_tokens = overlap_tokens
 
-        # Token approximation parameters
-        self.chars_per_token = 4.0  # Average: 1 token ≈ 4 characters
-        self.safety_factor = 0.9    # Use 90% of limit for safety margin
+        # Token approximation parameters (from constants)
+        self.chars_per_token = CHARS_PER_TOKEN
+        self.safety_factor = TOKEN_SAFETY_FACTOR
 
         # Effective limits accounting for safety
         self.effective_max_tokens = int(max_tokens * self.safety_factor)
@@ -171,7 +172,8 @@ class EmailChunker:
                 # Update overlap buffer with last sentences of last chunk
                 if sentence_chunks:
                     last_chunk_text = sentence_chunks[-1]['chunk_text']
-                    overlap_buffer = [last_chunk_text[-800:]]  # ~200 tokens
+                    overlap_chars = int(self.effective_overlap_tokens * self.chars_per_token)
+                    overlap_buffer = [last_chunk_text[-overlap_chars:]]
 
                 continue
 

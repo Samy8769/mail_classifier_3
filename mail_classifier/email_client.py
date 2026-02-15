@@ -10,6 +10,9 @@ import pythoncom
 from datetime import timezone
 from typing import Dict, List, Any, Optional
 from .constants import OutlookFolders
+from .logger import get_logger
+
+logger = get_logger('email_client')
 
 
 class EmailClient:
@@ -109,7 +112,7 @@ class EmailClient:
                     emails.append(message)
             except Exception as e:
                 # Skip messages that can't be accessed
-                print(f"Warning: Could not access message: {e}")
+                logger.warning(f"Could not access message: {e}")
                 continue
 
         return emails
@@ -138,7 +141,7 @@ class EmailClient:
                 conversations[conv_id].append(email_data)
 
             except Exception as e:
-                print(f"Warning: Could not process message: {e}")
+                logger.warning(f"Could not process message: {e}")
                 continue
 
         return conversations
@@ -234,7 +237,7 @@ class EmailClient:
                     count += 1
 
             except Exception as e:
-                print(f"Warning: Could not apply categories to message: {e}")
+                logger.warning(f"Could not apply categories to message: {e}")
                 continue
 
-        print(f"Applied categories to {count} emails in conversation")
+        logger.info(f"Applied categories to {count} emails in conversation")

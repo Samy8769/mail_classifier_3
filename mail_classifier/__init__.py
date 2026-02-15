@@ -7,7 +7,7 @@ Example usage:
     from mail_classifier import Config, EmailClient, Categorizer, ParadigmAPIClient, StateManager
 
     # Load configuration
-    config = Config.load('config/settings.yaml')
+    config = Config.load('config/settings.json')
 
     # Initialize components
     api = ParadigmAPIClient(config.api, config.proxy)

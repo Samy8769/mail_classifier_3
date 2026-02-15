@@ -10,6 +10,10 @@ from typing import List, Dict, Any, Optional
 from .config import Config, AxisConfig
 from .api_client import ParadigmAPIClient
 from .state_manager import StateManager
+from .utils import parse_categories
+from .logger import get_logger
+
+logger = get_logger('categorizer')
 
 
 class Categorizer:
@@ -55,7 +59,8 @@ class Categorizer:
                 if isinstance(section_data, dict):
                     return section_data.get(key, default)
             return default
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Error accessing config {section}.{key}: {e}")
             return default
 
     def categorize_conversation(self, conversation_id: str,
@@ -76,7 +81,7 @@ class Categorizer:
         if self.state.is_conversation_processed(conversation_id):
             cached = self.state.get_cached_categories(conversation_id)
             if cached:
-                print(f"Conversation {conversation_id} already processed, using cache")
+                logger.info(f"Conversation {conversation_id} already processed, using cache")
                 return cached
 
         # Boucle dans les conversations (preserve comment from line 222)
@@ -90,7 +95,7 @@ class Categorizer:
             try:
                 categories = self.db.apply_inference_rules(categories)
             except Exception as e:
-                print(f"  ⚠ Inference rules error: {e}")
+                logger.warning(f"Inference rules error: {e}")
 
         # v3.2: Tag validation (deterministic DB check + optional LLM)
         # Always run if validator and DB are available, regardless of validation flag
@@ -139,7 +144,7 @@ class Categorizer:
                 max_tokens = self.chunker.effective_max_tokens
 
                 if token_count > max_tokens:
-                    print(f"  📧 Email {i} exceeds token limit ({token_count} tokens). Chunking...")
+                    logger.info(f"Email {i} exceeds token limit ({token_count} tokens). Chunking...")
                     summary = self._summarize_with_chunking(email, i)
                     summaries.append(summary)
                     continue
@@ -179,7 +184,7 @@ class Categorizer:
             }
         )
 
-        print(f"    Created {len(chunks)} chunks ({', '.join([str(c['token_count']) for c in chunks])} tokens)")
+        logger.info(f"Created {len(chunks)} chunks ({', '.join([str(c['token_count']) for c in chunks])} tokens)")
 
         # Summarize each chunk
         resume_axis = self.config.get_axis_by_name('resume')
@@ -277,7 +282,7 @@ class Categorizer:
             category_list = self._parse_categories(categories_str)
             all_categories.extend(category_list)
 
-            print(f"AI {axis.name} done")
+            logger.info(f"AI {axis.name} done")
 
         return all_categories
 
@@ -324,7 +329,7 @@ class Categorizer:
                 if db_rules and len(db_rules) > 50:
                     parts.append(f"règles à suivre impérativement:\n{db_rules}")
             except Exception as e:
-                print(f"  ⚠ DB rules error: {e}")
+                logger.warning(f"DB rules error: {e}")
                 # Fallback to file-based rules only if DB fails
                 if axis.rules:
                     parts.append(f"règles à suivre impérativement {axis.rules}")
@@ -342,7 +347,7 @@ class Categorizer:
     def _parse_categories(self, category_string: str) -> List[str]:
         """
         Parse comma-separated categories into list.
-        Extracted from lines 290-294 of original script.
+        Delegates to centralized utils.parse_categories.
 
         Args:
             category_string: Comma-separated category string
@@ -350,13 +355,7 @@ class Categorizer:
         Returns:
             List of category strings
         """
-        if isinstance(category_string, list):
-            return category_string
-
-        # Split by comma and strip whitespace
-        categories = [c.strip() for c in category_string.split(',') if c.strip()]
-
-        return categories
+        return parse_categories(category_string)
 
     def _store_classification_in_db(self, conversation_id: str,
                                     emails: List[Dict[str, Any]],
@@ -400,4 +399,4 @@ class Categorizer:
                         )
 
         except Exception as e:
-            print(f"  ⚠ Database storage error: {e}")
+            logger.error(f"Database storage error: {e}")

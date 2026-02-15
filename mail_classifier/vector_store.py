@@ -8,6 +8,9 @@ import pickle
 import numpy as np
 from typing import List, Dict, Tuple, Optional
 from datetime import datetime
+from .logger import get_logger
+
+logger = get_logger('vector_store')
 
 
 class VectorStore:
@@ -16,7 +19,8 @@ class VectorStore:
     Stores embeddings as numpy arrays on filesystem.
     """
 
-    def __init__(self, db, api_client, storage_dir: str = "embeddings",
+    def __init__(self, db: 'DatabaseManager', api_client: 'ParadigmAPIClient',
+                 storage_dir: str = "embeddings",
                  embedding_model: str = "multilingual-e5-large",
                  embedding_dim: int = 1024,
                  cache_in_memory: bool = True,
@@ -55,10 +59,10 @@ class VectorStore:
             try:
                 with open(self.index_path, 'rb') as f:
                     index = pickle.load(f)
-                print(f"✓ Loaded embedding index: {len(index)} entries")
+                logger.info(f"Loaded embedding index: {len(index)} entries")
                 return index
             except Exception as e:
-                print(f"⚠ Error loading index, creating new: {e}")
+                logger.warning(f"Error loading index, creating new: {e}")
                 return {}
         return {}
 
@@ -68,7 +72,7 @@ class VectorStore:
             with open(self.index_path, 'wb') as f:
                 pickle.dump(self.index, f)
         except Exception as e:
-            print(f"✗ Error saving index: {e}")
+            logger.error(f"Error saving index: {e}")
 
     def embed_text(self, text: str) -> np.ndarray:
         """
@@ -89,17 +93,17 @@ class VectorStore:
 
             # Validate dimension
             if embedding.shape[0] != self.embedding_dim:
-                print(f"⚠ Warning: Expected {self.embedding_dim} dimensions, got {embedding.shape[0]}")
+                logger.warning(f"Expected {self.embedding_dim} dimensions, got {embedding.shape[0]}")
 
             return embedding
 
         except AttributeError:
             # Fallback: api_client might not have get_embedding yet
-            print("⚠ API client doesn't have get_embedding method yet")
+            logger.warning("API client doesn't have get_embedding method yet")
             # Return random embedding for testing (TEMPORARY)
             return np.random.randn(self.embedding_dim).astype(np.float32)
         except Exception as e:
-            print(f"✗ Error generating embedding: {e}")
+            logger.error(f"Error generating embedding: {e}")
             raise
 
     def _get_embedding_path(self, chunk_id: int) -> str:
@@ -118,9 +122,8 @@ class VectorStore:
             embedding_id from database
         """
         # Generate embedding
-        print(f"  Generating embedding for chunk {chunk_id}...", end='')
+        logger.info(f"Generating embedding for chunk {chunk_id}...")
         embedding = self.embed_text(chunk_text)
-        print(" ✓")
 
         # Save to filesystem
         embedding_path = self._get_embedding_path(chunk_id)
@@ -170,7 +173,7 @@ class VectorStore:
         # Load from filesystem
         embedding_path = self.index[chunk_id]
         if not os.path.exists(embedding_path):
-            print(f"⚠ Embedding file not found: {embedding_path}")
+            logger.warning(f"Embedding file not found: {embedding_path}")
             return None
 
         try:
@@ -182,7 +185,7 @@ class VectorStore:
 
             return embedding
         except Exception as e:
-            print(f"✗ Error loading embedding {chunk_id}: {e}")
+            logger.error(f"Error loading embedding {chunk_id}: {e}")
             return None
 
     def _add_to_cache(self, chunk_id: int, embedding: np.ndarray):
@@ -237,23 +240,22 @@ class VectorStore:
             List of {chunk_id, email_id, score, chunk_text} dicts
         """
         # Generate query embedding
-        print(f"Generating query embedding...", end='')
+        logger.info("Generating query embedding...")
         query_embedding = self.embed_text(query_text)
-        print(" ✓")
 
         # Normalize query embedding
         query_norm = np.linalg.norm(query_embedding)
         if query_norm == 0:
-            print("⚠ Query embedding has zero norm")
+            logger.warning("Query embedding has zero norm")
             return []
         query_normalized = query_embedding / query_norm
 
         # Batch load all embeddings (optimized)
-        print(f"Loading {len(self.index)} embeddings...")
+        logger.info(f"Loading {len(self.index)} embeddings...")
         all_embeddings = self._batch_load_embeddings(list(self.index.keys()))
 
         # Compute similarities
-        print(f"Computing similarities...")
+        logger.debug("Computing similarities...")
         similarities = []
 
         for chunk_id, embedding in all_embeddings.items():
@@ -290,7 +292,7 @@ class VectorStore:
                     'chunk_type': chunk['chunk_type']
                 })
 
-        print(f"✓ Found {len(results)} results")
+        logger.info(f"Found {len(results)} results")
         return results
 
     def batch_embed_emails(self, email_ids: List[int], show_progress: bool = True):
@@ -305,19 +307,18 @@ class VectorStore:
         processed = 0
         errors = 0
 
-        print(f"\nBatch embedding {total} emails...")
-        print("=" * 60)
+        logger.info(f"Batch embedding {total} emails...")
 
         for i, email_id in enumerate(email_ids, 1):
             if show_progress:
-                print(f"\n[{i}/{total}] Email {email_id}")
+                logger.info(f"[{i}/{total}] Email {email_id}")
 
             try:
                 # Get chunks for this email
                 chunks = self.db.get_chunks_for_email(email_id)
 
                 if not chunks:
-                    print(f"  ⚠ No chunks found for email {email_id}")
+                    logger.warning(f"No chunks found for email {email_id}")
                     continue
 
                 # Embed each chunk
@@ -327,7 +328,7 @@ class VectorStore:
                     # Check if already embedded
                     existing = self.db.get_embedding_metadata(chunk_id)
                     if existing:
-                        print(f"  ⊙ Chunk {chunk_id} already embedded, skipping")
+                        logger.debug(f"Chunk {chunk_id} already embedded, skipping")
                         continue
 
                     # Store embedding
@@ -336,14 +337,10 @@ class VectorStore:
                 processed += 1
 
             except Exception as e:
-                print(f"  ✗ Error processing email {email_id}: {e}")
+                logger.error(f"Error processing email {email_id}: {e}")
                 errors += 1
 
-        print("\n" + "=" * 60)
-        print(f"Batch embedding complete:")
-        print(f"  Processed: {processed}/{total}")
-        print(f"  Errors: {errors}")
-        print("=" * 60)
+        logger.info(f"Batch embedding complete: Processed {processed}/{total}, Errors: {errors}")
 
     def get_statistics(self) -> Dict[str, int]:
         """Get embedding statistics."""
@@ -373,11 +370,11 @@ class VectorStore:
     def clear_cache(self):
         """Clear memory cache."""
         self._embedding_cache.clear()
-        print("✓ Embedding cache cleared")
+        logger.info("Embedding cache cleared")
 
     def rebuild_index(self):
         """Rebuild index from database and filesystem."""
-        print("Rebuilding embedding index...")
+        logger.info("Rebuilding embedding index...")
 
         # Get all embeddings from database
         all_metadata = self.db.get_all_embeddings_metadata()
@@ -394,13 +391,13 @@ class VectorStore:
                 new_index[chunk_id] = embedding_path
                 found += 1
             else:
-                print(f"  ⚠ Missing file for chunk {chunk_id}: {embedding_path}")
+                logger.warning(f"Missing file for chunk {chunk_id}: {embedding_path}")
                 missing += 1
 
         self.index = new_index
         self._save_index()
 
-        print(f"✓ Index rebuilt: {found} found, {missing} missing")
+        logger.info(f"Index rebuilt: {found} found, {missing} missing")
 
     def close(self):
         """Cleanup resources."""

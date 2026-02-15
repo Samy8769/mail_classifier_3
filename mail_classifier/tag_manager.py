@@ -3,11 +3,12 @@ Tag management for database-backed classification rules.
 CRUD operations for classification tags.
 """
 
-from typing import List, Dict, Optional
-from .database import DatabaseManager
-# Import at module level for convenience
+from typing import List, Dict, Optional, Any
 from datetime import datetime
-from typing import Any
+from .database import DatabaseManager
+from .logger import get_logger
+
+logger = get_logger('tag_manager')
 
 
 class TagManager:
@@ -91,7 +92,7 @@ class TagManager:
             else:
                 # Reactivate inactive tag
                 self.db.update_tag(tag_name, is_active=1, description=description)
-                print(f"✓ Tag '{tag_name}' reactivated")
+                logger.info(f"Tag '{tag_name}' reactivated")
                 return existing['tag_id']
 
         # Insert tag
@@ -103,7 +104,7 @@ class TagManager:
             metadata=metadata
         )
 
-        print(f"✓ Tag '{tag_name}' added to axis '{axis_name}' (ID: {tag_id})")
+        logger.info(f"Tag '{tag_name}' added to axis '{axis_name}' (ID: {tag_id})")
         return tag_id
 
     def _detect_axis_from_tag(self, tag_name: str) -> Optional[str]:
@@ -185,11 +186,11 @@ class TagManager:
             kwargs['is_active'] = 1 if is_active else 0
 
         if not kwargs:
-            print(f"No changes specified for tag '{tag_name}'")
+            logger.info(f"No changes specified for tag '{tag_name}'")
             return
 
         self.db.update_tag(tag_name, **kwargs)
-        print(f"✓ Tag '{tag_name}' updated")
+        logger.info(f"Tag '{tag_name}' updated")
 
     def delete_tag(self, tag_name: str, hard_delete: bool = False):
         """
@@ -201,10 +202,10 @@ class TagManager:
         """
         if hard_delete:
             self.db.delete_tag(tag_name, soft_delete=False)
-            print(f"✓ Tag '{tag_name}' deleted permanently")
+            logger.info(f"Tag '{tag_name}' deleted permanently")
         else:
             self.db.delete_tag(tag_name, soft_delete=True)
-            print(f"✓ Tag '{tag_name}' deactivated")
+            logger.info(f"Tag '{tag_name}' deactivated")
 
     def export_tags_to_yaml(self, axis_name: str, output_path: str):
         """
@@ -219,7 +220,7 @@ class TagManager:
         tags = self.db.get_tags_by_axis(axis_name)
 
         if not tags:
-            print(f"No tags found for axis '{axis_name}'")
+            logger.info(f"No tags found for axis '{axis_name}'")
             return
 
         # Build YAML structure
@@ -241,7 +242,7 @@ class TagManager:
         with open(output_path, 'w', encoding='utf-8') as f:
             yaml.dump(yaml_data, f, allow_unicode=True, sort_keys=False)
 
-        print(f"✓ Exported {len(tags)} tags to {output_path}")
+        logger.info(f"Exported {len(tags)} tags to {output_path}")
 
     def import_tags_from_yaml(self, yaml_path: str, axis_name: str) -> int:
         """
@@ -260,7 +261,7 @@ class TagManager:
             data = yaml.safe_load(f)
 
         if not data or 'tags' not in data:
-            print(f"Invalid YAML format in {yaml_path}")
+            logger.warning(f"Invalid YAML format in {yaml_path}")
             return 0
 
         imported = 0
@@ -274,11 +275,11 @@ class TagManager:
                 )
                 imported += 1
             except ValueError as e:
-                print(f"  ⚠ Skipped {tag_name}: {e}")
+                logger.warning(f"Skipped {tag_name}: {e}")
             except Exception as e:
-                print(f"  ✗ Error importing {tag_name}: {e}")
+                logger.error(f"Error importing {tag_name}: {e}")
 
-        print(f"✓ Imported {imported} tags from {yaml_path}")
+        logger.info(f"Imported {imported} tags from {yaml_path}")
         return imported
 
     def get_tag_statistics(self) -> Dict[str, Any]:

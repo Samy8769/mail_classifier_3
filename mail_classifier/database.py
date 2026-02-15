@@ -9,6 +9,9 @@ import os
 from contextlib import contextmanager
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from .logger import get_logger
+
+logger = get_logger('database')
 
 
 class DatabaseManager:
@@ -62,7 +65,7 @@ class DatabaseManager:
 
         self.connection.executescript(schema_sql)
         self.connection.commit()
-        print(f"✓ Database schema created at: {self.db_path}")
+        logger.info(f"Database schema created at: {self.db_path}")
 
     @contextmanager
     def transaction(self):
@@ -70,9 +73,9 @@ class DatabaseManager:
         try:
             yield self.connection
             self.connection.commit()
-        except Exception as e:
+        except Exception:
             self.connection.rollback()
-            raise e
+            raise
 
     # ==================== Email Operations ====================
 
@@ -321,7 +324,8 @@ class DatabaseManager:
                 ORDER BY constraint_order ASC
             """, (axis_name,))
             return [row['constraint_text'] for row in cursor.fetchall()]
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Error fetching constraints for axis '{axis_name}': {e}")
             return []
 
     def get_all_constraints(self) -> Dict[str, List[str]]:
@@ -339,7 +343,8 @@ class DatabaseManager:
                     result[axis] = []
                 result[axis].append(row['constraint_text'])
             return result
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Error fetching all constraints: {e}")
             return {}
 
     # ==================== Inference Rules Operations ====================
@@ -368,7 +373,8 @@ class DatabaseManager:
                     ORDER BY priority ASC
                 """)
             return [dict(row) for row in cursor.fetchall()]
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Error fetching inference rules: {e}")
             return []
 
     def apply_inference_rules(self, tags: List[str]) -> List[str]:
@@ -422,7 +428,8 @@ class DatabaseManager:
                     ORDER BY term ASC
                 """)
             return [dict(row) for row in cursor.fetchall()]
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Error fetching definitions: {e}")
             return []
 
     def get_definition(self, term: str) -> Optional[str]:
@@ -434,7 +441,8 @@ class DatabaseManager:
             )
             row = cursor.fetchone()
             return row['definition'] if row else None
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Error fetching definition for '{term}': {e}")
             return None
 
     # ==================== Color Palette Operations ====================
@@ -447,7 +455,8 @@ class DatabaseManager:
                 WHERE is_active = 1
             """)
             return {row['prefix_or_tag']: row['color_name'] for row in cursor.fetchall()}
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Error fetching color palette: {e}")
             return {}
 
     def get_color_for_tag(self, tag: str) -> Optional[str]:
@@ -477,7 +486,8 @@ class DatabaseManager:
                     return row['color_name']
 
             return None
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Error fetching color for tag '{tag}': {e}")
             return None
 
     # ==================== Tag Lookup Operations ====================

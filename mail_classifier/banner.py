@@ -12,7 +12,7 @@ def display_banner():
 ╔══════════════════════════════════════════════════════════════════╗
 ║                                                                  ║
 ║              Mail Classifier - AI-Powered Email Tool             ║
-║                       Version 2.0 Enhanced                       ║
+║                       Version 3.1                                ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
 
@@ -206,7 +206,7 @@ Pour plus d'informations, consultez le README.md
 def display_short_help():
     """Display short help for --help flag."""
     short_help = """
-Mail Classifier v2.0 - Classification IA d'emails
+Mail Classifier v3.1 - Classification IA d'emails
 
 Commandes principales :
   classify              Classifier les emails Outlook
