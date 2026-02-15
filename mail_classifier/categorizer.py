@@ -92,14 +92,19 @@ class Categorizer:
             except Exception as e:
                 print(f"  ⚠ Inference rules error: {e}")
 
-        # V2.0: LLM validation step
-        if self.use_validation and self.validator:
-            print("AI validation", end='')
+        # v3.2: Tag validation (deterministic DB check + optional LLM)
+        # Always run if validator and DB are available, regardless of validation flag
+        if self.validator and self.db:
             summaries_str = str(email_summaries)
             categories = self.validator.validate_and_correct(
                 conversation_id, summaries_str, categories
             )
-            print(" done")
+        elif self.use_validation and self.validator:
+            # Fallback: LLM-only validation without DB
+            summaries_str = str(email_summaries)
+            categories = self.validator.validate_and_correct(
+                conversation_id, summaries_str, categories
+            )
 
         # V2.0: Store in database if enabled
         if self.use_database and self.db:

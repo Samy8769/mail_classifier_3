@@ -480,6 +480,32 @@ class DatabaseManager:
         except Exception:
             return None
 
+    # ==================== Tag Lookup Operations ====================
+
+    def get_all_active_tag_names(self) -> set:
+        """
+        Get all active tag names as a set for fast lookup.
+
+        Returns:
+            Set of all active tag_name strings
+        """
+        cursor = self.connection.execute(
+            "SELECT tag_name FROM tags WHERE is_active = 1"
+        )
+        return {row['tag_name'] for row in cursor.fetchall()}
+
+    def get_all_active_tags_with_axis(self) -> List[Dict]:
+        """
+        Get all active tags with their axis and prefix info.
+
+        Returns:
+            List of dicts with tag_name, axis_name, prefix
+        """
+        cursor = self.connection.execute(
+            "SELECT tag_name, axis_name, prefix FROM tags WHERE is_active = 1 ORDER BY tag_name"
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
     # ==================== Full Rules Reconstruction ====================
 
     # Related axes mapping: when building rules for an axis,
