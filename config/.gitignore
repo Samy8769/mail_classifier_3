@@ -1,0 +1,7 @@
+settings.json
+settings.yaml
+*.log
+../.classifier_cache.json
+__pycache__/
+*.pyc
+.env

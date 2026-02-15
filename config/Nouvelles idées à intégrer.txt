@@ -1,0 +1,10 @@
+
+Prop
+
+
+
+
+Sécurité : Couvre l'export control, le REAch
+Documentation : Inclut la préparation des datapacks, les KIP, les MIP, et les peintures.
+
+ajouter le concept de source / pour faire du RAG ou chercher d'autres agents

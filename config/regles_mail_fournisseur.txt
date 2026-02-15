@@ -1,0 +1,62 @@
+outlook_categories_referential:
+ metadata:
+   version: "1.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   fournisseurs:
+     prefix: "F_"
+     description: "Fournisseurs et prestataires"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - F_ADS
+       - F_Bertin
+       - F_3DPlus  #3D+
+       - F_ACKTAR
+       - F_AMV
+       - F_ED TEC
+       - F_EMITECH
+       - F_FRENTECH
+       - F_FICHOU
+       - F_HUGOTTE
+       - F_MECAVIDEO
+       - F_OPA
+       - F_REC
+       - F_TECNOTTICA
+       - F_SCHOTT
+       - F_STEIGER
+       - F_TECNOTTICA
+       - F_OSPREY
+       # extensible
+
+ inference_rules:
+
+   - if: "F_ present"
+     then:
+       - find: "F_"
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "IA must not delete existing categories"
+   - "F_ uniquement si le fournisseur est EXPLICITEMENT mentionné dans le mail (nom, email, signature, ou contexte clair)"
+   - "Ne pas assigner F_ juste parce qu'un composant ou service pourrait venir d'un fournisseur"
+   - "En cas de doute sur F_, ne rien retourner pour cet axe"
+   - "Généralement 0 à 2 fournisseurs par mail, rarement plus"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"
+   - "YCE = YODA_CE"
+   - "YCL = YODA_CL"
+

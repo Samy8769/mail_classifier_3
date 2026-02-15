@@ -1,0 +1,143 @@
+outlook_categories_referential:
+ metadata:
+   version: "1.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   equipement_types:
+     prefix: "EQT_"
+     description: "Type d’équipement (famille produit)"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - EQT_Camera
+       - EQT_Module
+       - EQT_Viseur
+       - EQT_Objectif
+       - EQT_Telescope
+       - EQT_Lentilles
+       - EQT_Carte_Electronique
+       - EQT_Banc_Essai
+       - EQT_Baffle
+       - EQT_Barillet
+       - EQT_EGSE
+       - EQT_OGSE
+       - EQT_MGSE
+       - EQT_Electronic Unit
+       - EQT_Câbles
+       - EQT_Hélicoils
+       - EQT_Entretoises
+       - EQT_Vis
+       - EQT_Plan de pose
+       - EQT_Cube de visée
+       - EQT_Réchauffeur
+       - EQT_PCB
+       - EQT_Connecteurs
+       - EQT_Savers
+       - EQT_Diaphragmes
+       - EQT_Pads
+       - EQT_FPGA
+       - EQT_Miroir
+       - EQT_CTA
+       - EQT_Verrouillages
+       - EQT_Tresses Thermiques
+
+
+   equipement_designations:
+     prefix: "EQ_"
+     description: "Désignation réelle / configuration équipement"
+     multiplicity: "0..n"
+     list_type: closed
+     source: "Configuration produit"
+     values:
+       - EQ_PFM
+       - EQ_STM
+       - EQ_FSK
+       - EQ_FM1
+       - EQ_FM2
+       - EQ_FM3
+       - EQ_MSTH
+       - EQ_LABB
+       - EQ_LSR2
+       - EQ_ShM1
+       - EQ_ShM2
+       - EQ_ShM1_v2
+       - EQ_ShM1_v3
+       - EQ_ShM1_v4
+       - EQ_CAM001
+       - EQ_CAM002
+       - EQ_CAM003
+       - EQ_CAM004
+       - EQ_CAM005
+       - EQ_CAM006
+       - EQ_CAM007
+       - EQ_CAM008
+       - EQ_CAM009
+       - EQ_CAM010
+       - EQ_CAM011
+       - EQ_CAM012
+       - EQ_CAM013
+       - EQ_CAM014
+       - EQ_CAM015
+       - EQ_CAM016
+       - EQ_CAM017
+       - EQ_CAM018
+       - EQ_CAM019
+       - EQ_CAM020
+       - EQ_CAM021
+       - EQ_CAM023
+       - EQ_CAM024
+       - EQ_CAM025
+       - EQ_OBJ001
+       - EQ_OBJ002
+       - EQ_OBJ003
+       - EQ_OBJ004
+       - EQ_OBJ005
+       - EQ_OBJ006
+       - EQ_OBJ007
+       - EQ_OBJ008
+       - EQ_OBJ009
+       - EQ_OBJ010
+       - EQ_OBJ011
+       - EQ_OBJ012
+       - EQ_OBJ013
+       - EQ_OBJ014
+       - EQ_OBJ015
+       - EQ_OBJ016
+       - EQ_OBJ017
+       - EQ_OBJ018
+       - EQ_OBJ019
+       - EQ_OBJ020
+       - EQ_OBJ021
+       - EQ_OBJ023
+       - EQ_OBJ024
+       - EQ_OBJ025
+       - EQ_MQV
+       - EQ_MQV1
+       - EQ_MQV2
+
+
+ inference_rules:
+   - if: "EQT_ present"
+     then:
+       - find: "EQ_"
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "IA must not delete existing categories"
+   - "Indicate EQ_ only if EXACTLY found in the mail or subject"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"
+

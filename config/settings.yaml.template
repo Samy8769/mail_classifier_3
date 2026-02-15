@@ -1,0 +1,55 @@
+# API Configuration
+api:
+  base_url: "https://your-paradigm-server.com/api/v2"
+  api_key: "${PARADIGM_API_KEY}"  # Set environment variable
+  model: "alfred-4.2"
+  temperature: 0.2
+  verify_ssl: false
+
+# Proxy Configuration
+proxy:
+  http: "http://your-proxy:8080"
+  https: "http://your-proxy:8080"
+  no_proxy: "localhost,127.0.0.1"
+
+# Outlook Configuration
+outlook:
+  default_folders:
+    - "Inbox"  # Can be folder name or number (6=Inbox)
+  ai_trigger_category: "AI"
+  done_marker_category: "AI done"
+
+# Classification Axes
+classification:
+  axes:
+    - name: "resume"
+      prompt_file: "prompt_mail_resume.txt"
+      regles_file: null
+
+    - name: "type"
+      prompt_file: "prompt_mail_type.txt"
+      regles_file: "regles_mail_type.txt"
+
+    - name: "projet"
+      prompt_file: "prompt_mail_projet.txt"
+      regles_file: "regles_mail_projet.txt"
+
+    - name: "fournisseur"
+      prompt_file: "prompt_mail_fournisseur.txt"
+      regles_file: "regles_mail_fournisseur.txt"
+      dependencies: ["projet"]
+
+    - name: "equipement"
+      prompt_file: "prompt_mail_equipement.txt"
+      regles_file: "regles_mail_equipement.txt"
+      dependencies: ["projet", "fournisseur"]
+
+    - name: "processus"
+      prompt_file: "prompt_mail_processus.txt"
+      regles_file: "regles_mail_processus.txt"
+
+# State Persistence
+state:
+  enabled: true
+  cache_file: ".classifier_cache.json"
+  use_outlook_categories: true

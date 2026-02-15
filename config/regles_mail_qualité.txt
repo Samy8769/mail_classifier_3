@@ -1,0 +1,154 @@
+outlook_categories_referential:
+ metadata:
+   version: "1.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   qualité:
+     prefix: "Q_"
+     description: "Qualité - outil de suivi, amélioration, retour d'expérience, best practices"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - Bilan Qualité
+       - Configuration
+       - ECR
+       - AQM
+       - QRQC
+       - REAch
+       - Export_Control
+       - RETEX
+       - Best_Practices
+       - Risque
+       - Revue_de_Pair
+       - Opportunité
+       # extensible
+
+   jalons:
+     prefix: "J_"
+     description: "Jalons et revues projet (spatial)"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - Appel d'offre
+       - Kickoff
+       - Lancement
+       - Avancement
+       - SRR
+       - PDR
+       - CDR
+       - SRR FPGA
+       - PDR FPGA
+       - CDR FPGA
+       - TRR
+       - DRB
+       - TRB
+       - MPCB
+       - EQSR
+       - PCB
+       - FAI
+       - RLF
+       - QR
+       - KIP
+       - MIP
+       - Livraison
+       - Cloture
+
+   anomalies:
+     prefix: "AN_"
+     description: "Anomalies et non-conformités"
+     multiplicity: "0..n"
+     rules:
+       - "Implique T_Qualite"
+       - "Implique T_Anomalie"
+     values:
+       - Anomalie
+       - NonConformite
+       - Deviation
+       - Waiver
+
+   nrb:
+     prefix: "NRB_"
+     description: "Nonconformance Review Board"
+     multiplicity: "0..n"
+     rules:
+       - "Implique T_Qualite"
+       - "Implique S_Action_Requise"
+     values:
+       - Preparation
+       - En_Cours
+       - Cloturee
+       - Action
+
+   statut:
+     prefix: "S_"
+     description: "Statut et action associée"
+     multiplicity: "exactly_1"
+     list_type: "closed"
+     priority: "highest"
+     values:
+       - Urgent
+       - Action_Requise
+       - Attente_Reponse
+       - Classification_incertaine
+       - Pour_Info
+       - A_Archiver
+
+ inference_rules:
+   - if: "AN_ present"
+     then:
+       - add: "T_Qualite"
+       - add: "T_Anomalie"
+
+   - if: "NRB_ present"
+     then:
+       - add: "T_Qualite"
+       - add: "S_Action_Requise"
+
+   - if: "J_ present"
+     then:
+       - add: "T_Projet"
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "IA must not delete existing categories"
+   - "Exactly one S_ category per email"
+   - "Indicate EQ_ only if EXACTLY found in the mail or subject"
+   - "if P_ category is not certain, indicate Projet_AD"
+   - "if the analysis is not certain, indicate Classification_incertaine in S_ category"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"
+   - "YCE = YODA_CE"
+   - "YCL = YODA_CL"
+
+ color_palette:
+   T_: "Grey"
+   C_: "Blue"
+   A_: "Green"
+   P_: "Purple"
+   TC_: "Magenta"
+   E_: "Orange"
+   D_: "Gold"
+   J_: "Salmon"
+   Q_: "Violet"	
+   EQT_: "Turquoise"
+   EQ_: "DarkBlue"
+   AN_: "Red"
+   NRB_: "Red"
+   S_Urgent: "DarkRed"
+   S_Action_Requise: "Red"
+   S_Attente_Reponse: "Yellow"
+   S_Pour_Info: "LightGreen"
+   S_A_Archiver: "DarkGrey"

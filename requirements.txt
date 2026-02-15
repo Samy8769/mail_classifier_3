@@ -1,0 +1,7 @@
+pywin32>=305
+openai>=1.0.0
+httpx>=0.25.0
+
+# Added for v2.0 enhancements
+numpy>=1.24.0
+pyyaml>=6.0

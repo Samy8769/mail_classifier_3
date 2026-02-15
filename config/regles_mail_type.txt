@@ -1,0 +1,61 @@
+outlook_categories_referential:
+ metadata:
+   version: "1.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   type:
+     prefix: "T_"
+     description: "Type principal de l’e-mail"
+     multiplicity: "1..2"
+     list_type: "closed"
+     values:
+       - T_Client
+       - T_Affaire
+       - T_Projet
+       - T_Technique
+       - T_Essais
+       - T_Fournisseur
+       - T_Qualite
+       - T_Anomalie
+       - T_Amelioration
+       - T_Communication_Interne
+       - T_CSE_RH
+       - T_Administratif
+
+   statut:
+     prefix: "S_"
+     description: "Statut et action associée"
+     multiplicity: "exactly_1"
+     list_type: "closed"
+     priority: "highest"
+     values:
+       - S_Urgent
+       - S_Action_Requise
+       - S_Attente_Reponse
+       - S_Classification_incertaine
+       - S_Pour_Info
+       - S_Archiver
+
+ 
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "IA must not delete existing categories"
+   - "Exactly one S_ category per email"
+   - "if the analysis is not certain, indicate Classification_incertaine in S_ category"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"
+   - "YCE = YODA_CE"
+   - "YCL = YODA_CL"

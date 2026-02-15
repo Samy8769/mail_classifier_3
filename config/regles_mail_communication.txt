@@ -1,0 +1,433 @@
+outlook_categories_referential:
+ metadata:
+   version: "1.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   type:
+     prefix: "T_"
+     description: "Type principal de l’e-mail"
+     multiplicity: "1..n"
+     list_type: "closed"
+     values:
+       - Client
+       - Affaire
+       - Projet
+       - Technique
+       - Essais
+       - Fournisseur
+       - Qualite
+       - Anomalie
+       - Amelioration
+       - Communication_Interne
+       - CSE_RH
+       - Administratif
+
+   clients:
+     prefix: "C_"
+     description: "Clients finaux"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - AGS
+       - ADS
+       - ESA
+       - CNES
+       - TAS-I
+       - TAS-F
+       - GMV
+       - ASTROSCALE_US
+       - JHU_APL
+       - OHB
+       # extensible
+
+   affaires:
+     prefix: "A_"
+     description: "Affaires commerciales (multi-affaires autorisées)"
+     multiplicity: "0..n"
+     list_type: "closed"
+     format: "A_<VALEUR_CENTRALE>_<CLIENT>"
+     rules:
+       - "La valeur centrale est une string libre déterminée par le centre"
+       - "Toute affaire implique la catégorie client correspondante"
+     examples:
+       - A_YODA_A
+       - A_PROTECTION OF GALILEO_A
+       - A_SICRAL3_A
+       - A_EUROPA SKYNET6_A
+       - A_IOD ESA_A
+       - A_€ROSS_A
+       - A_CASPER_A
+       - A_COSMIC_A
+       - A_EGIDE_A
+       - A_ARGONAUT_A
+       - A_MERCURY_A
+       - A_NFI_A
+
+
+
+   projets:
+     prefix: "P_"
+     description: "Projets techniques"
+     multiplicity: "1..n"
+     list_type: "closed"
+     values:
+       - Projet_AD
+       - NAC_ERO
+       - YODA_CL
+       - YODA_CE
+       - AURIGA
+       - AURIGA_V2
+       - FS_NUMERIQUE
+       - IRIS²
+       - PANOPTES
+       - PADAWAN
+       - PARADIGM
+       - FABRIQ
+       - EPSILON3
+       - OVS
+       - AURICAM_4K
+       - JENKINS
+       - PYTHON
+       - N8N
+       # extensible
+
+
+   qualité:
+     prefix: "Q_"
+     description: "Qualité - outil de suivi, amélioration, retour d'expérience, best practices"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - Bilan Qualité
+       - Configuration
+       - ECR
+       - AQM
+       - QRQC
+       - REAch
+       - Export_Control
+       - RETEX
+       - Best_Practices
+       - Risque
+       - Revue_de_Pair
+       - Opportunité
+       # extensible
+
+   documentation:
+     prefix: "D_"
+     description: "Gestion documentaire, tout ce qui concerne la rédaction, validation et transmission de documents"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - MU # Manuel utilisateur
+       - PE # Plan d'essai
+       - PR # Procedure
+       - FS # Fiche Suiveuse
+       - PV # Procès verbal de contrôle ou d'inspection
+       - EMT # Procédure d'emballage et expédition
+       - Préparation_Datapack
+       # extensible
+
+   essais:
+     prefix: "E_"
+     description: "Essais et Bancs d’essais"
+     multiplicity: "0..n"
+     list_type: "closed"
+     source: "Production / Essais"
+     values:
+       - BSI
+       - BVT
+       - CNC250
+       - TEST_ELECTRIQUE
+       - MEV20
+       - BF
+       - BCG
+       - BCG1
+       - BCG2
+       - BRT
+       - VIBRATION
+       - CHOCS
+
+       # extensible
+
+   jalons:
+     prefix: "J_"
+     description: "Jalons et revues projet (spatial)"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - Appel d'offre
+       - Kickoff
+       - Lancement
+       - Avancement
+       - SRR
+       - PDR
+       - CDR
+       - SRR FPGA
+       - PDR FPGA
+       - CDR FPGA
+       - TRR
+       - DRB
+       - TRB
+       - MPCB
+       - EQSR
+       - PCB
+       - FAI
+       - RLF
+       - QR
+       - KIP
+       - MIP
+       - Livraison
+       - Cloture
+
+
+   technique:
+     prefix: "TC_"
+     description: "Processus de fabrication, traitement, contrôle, transport, logistique"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - DFC
+       - Commande
+       - Devis
+       - Achats
+       - Outillages
+       - Transport
+       - Inspection
+       - Emballage
+       - Propreté
+       - EMC
+       - ESD
+       - Spécifications
+       - Radiations
+       - Collage
+       - Bake-out
+       - SSM_ITO
+       - Sertissage
+       - Anti_Reflet
+       - Lumière_Parasite
+       - Bulles
+       - Stabilité
+       - Peinture
+       - Détermination_cale
+
+   equipement_types:
+     prefix: "EQT_"
+     description: "Type d’équipement (famille produit)"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - Camera
+       - Module
+       - Viseur
+       - Objectif
+       - Telescope
+       - Lentilles
+       - Carte_Electronique
+       - Banc_Essai
+       - Baffle
+       - Barillet
+       - EGSE
+       - OGSE
+       - MGSE
+       - Electronic Unit
+       - Câbles
+       - Hélicoils
+       - Entretoises
+       - Vis
+       - Plan de pose
+       - Cube de visée
+       - Réchauffeur
+       - PCB
+       - Connecteurs
+       - Savers
+       - Diaphragmes
+       - Pads
+       - FPGA
+       - Miroir
+       - CTA
+       - Verrouillages
+       - Tresses Thermiques
+
+
+
+
+   equipement_designations:
+     prefix: "EQ_"
+     description: "Désignation réelle / configuration équipement"
+     multiplicity: "0..n"
+     list_type: closed
+     source: "Configuration produit"
+     values:
+       - PFM
+       - STM
+       - FSK
+       - FM1
+       - FM2
+       - FM3
+       - MSTH
+       - LABB
+       - LSR2
+       - ShM1
+       - ShM2
+       - ShM1_v2
+       - ShM1_v3
+       - ShM1_v4
+       - CAM001
+       - CAM002
+       - CAM003
+       - CAM004
+       - CAM005
+       - CAM006
+       - CAM007
+       - CAM008
+       - CAM009
+       - CAM010
+       - CAM011
+       - CAM012
+       - CAM013
+       - CAM014
+       - CAM015
+       - CAM016
+       - CAM017
+       - CAM018
+       - CAM019
+       - CAM020
+       - CAM021
+       - CAM023
+       - CAM024
+       - CAM025
+       - OBJ001
+       - OBJ002
+       - OBJ003
+       - OBJ004
+       - OBJ005
+       - OBJ006
+       - OBJ007
+       - OBJ008
+       - OBJ009
+       - OBJ010
+       - OBJ011
+       - OBJ012
+       - OBJ013
+       - OBJ014
+       - OBJ015
+       - OBJ016
+       - OBJ017
+       - OBJ018
+       - OBJ019
+       - OBJ020
+       - OBJ021
+       - OBJ023
+       - OBJ024
+       - OBJ025
+       - MQV
+       - MQV1
+       - MQV2
+
+   anomalies:
+     prefix: "AN_"
+     description: "Anomalies et non-conformités"
+     multiplicity: "0..n"
+     rules:
+       - "Implique T_Qualite"
+       - "Implique T_Anomalie"
+     values:
+       - Anomalie
+       - NonConformite
+       - Deviation
+       - Waiver
+
+   nrb:
+     prefix: "NRB_"
+     description: "Nonconformance Review Board"
+     multiplicity: "0..n"
+     rules:
+       - "Implique T_Qualite"
+       - "Implique S_Action_Requise"
+     values:
+       - Preparation
+       - En_Cours
+       - Cloturee
+       - Action
+
+   statut:
+     prefix: "S_"
+     description: "Statut et action associée"
+     multiplicity: "exactly_1"
+     list_type: "closed"
+     priority: "highest"
+     values:
+       - Urgent
+       - Action_Requise
+       - Attente_Reponse
+       - Classification_incertaine
+       - Pour_Info
+       - A_Archiver
+
+ inference_rules:
+   - if: "AN_ present"
+     then:
+       - add: "T_Qualite"
+       - add: "T_Anomalie"
+
+   - if: "NRB_ present"
+     then:
+       - add: "T_Qualite"
+       - add: "S_Action_Requise"
+
+   - if: "EQT_ present"
+     then:
+       - find: "EQ_"
+
+   - if: "B_ present"
+     then:
+       - add: "T_Essais"
+
+   - if: "J_ present"
+     then:
+       - add: "T_Projet"
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "IA must not delete existing categories"
+   - "Exactly one S_ category per email"
+   - "Indicate EQ_ only if EXACTLY found in the mail or subject"
+   - "if P_ category is not certain, indicate Projet_AD"
+   - "if the analysis is not certain, indicate Classification_incertaine in S_ category"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"
+   - "YCE = YODA_CE"
+   - "YCL = YODA_CL"
+
+ color_palette:
+   T_: "Grey"
+   C_: "Blue"
+   A_: "Green"
+   P_: "Purple"
+   TC_: "Magenta"
+   E_: "Orange"
+   D_: "Gold"
+   J_: "Salmon"
+   Q_: "Violet"	
+   EQT_: "Turquoise"
+   EQ_: "DarkBlue"
+   AN_: "Red"
+   NRB_: "Red"
+   S_Urgent: "DarkRed"
+   S_Action_Requise: "Red"
+   S_Attente_Reponse: "Yellow"
+   S_Pour_Info: "LightGreen"
+   S_A_Archiver: "DarkGrey"

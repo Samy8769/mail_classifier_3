@@ -1,0 +1,80 @@
+outlook_categories_referential:
+ metadata:
+   version: "1.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   essais:
+     prefix: "E_"
+     description: "Essais et Bancs d’essais"
+     multiplicity: "0..n"
+     list_type: "closed"
+     source: "Production / Essais"
+     values:
+       - E_BSI
+       - E_BVT
+       - E_CNC250
+       - E_TEST_ELECTRIQUE
+       - E_MEV20
+       - E_BF
+       - E_BCG
+       - E_BCG1
+       - E_BCG2
+       - E_BRT
+       - E_VIBRATION
+       - E_CHOCS
+
+       # extensible
+
+   technique:
+     prefix: "TC_"
+     description: "Processus de fabrication, traitement, contrôle, transport, logistique"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - TC_DFC
+       - TC_Commande
+       - TC_Devis
+       - TC_Achats
+       - TC_Outillages
+       - TC_Transport
+       - TC_Inspection
+       - TC_Emballage
+       - TC_Propreté
+       - TC_EMC
+       - TC_ESD
+       - TC_Spécifications
+       - TC_Radiations
+       - TC_Collage
+       - TC_Bake-out
+       - TC_SSM_ITO
+       - TC_Sertissage
+       - TC_Anti_Reflet
+       - TC_Lumière_Parasite
+       - TC_Bulles
+       - TC_Stabilité
+       - TC_Peinture
+       - TC_Détermination_cale
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "IA must not delete existing categories"
+   - "E_ uniquement si le mail mentionne EXPLICITEMENT un banc d'essai spécifique (BSI, BVT, BCG, etc.) ou une campagne d'essai"
+   - "Ne pas assigner E_VIBRATION, E_CHOCS, E_TEST_ELECTRIQUE simplement parce que ces mots apparaissent dans le contexte technique"
+   - "E_ concerne les ESSAIS sur banc, pas les caractéristiques techniques d'un produit"
+   - "En cas de doute sur E_, ne rien retourner pour cet axe"
+
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"
