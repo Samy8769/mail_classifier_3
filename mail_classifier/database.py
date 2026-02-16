@@ -547,12 +547,24 @@ class DatabaseManager:
     # include tags from these related axes as well
     RELATED_AXES = {
         'qualite': ['qualite', 'jalons', 'anomalies', 'nrb'],
+        'equipement_type': ['equipement_type'],
+        'equipement_designation': ['equipement_designation'],
+    }
+
+    # Prefix filter: when reconstructing rules for a split axis,
+    # only include tags with these prefixes
+    AXIS_PREFIX_FILTER = {
+        'equipement_type': ['EQT_'],
+        'equipement_designation': ['EQ_'],
     }
 
     def reconstruct_full_rules(self, axis_name: str) -> str:
         """
         Reconstruct complete rules for an axis from database.
         Replaces loading from regles_mail_*.txt files.
+
+        Supports split axes (e.g., equipement_type, equipement_designation)
+        by querying the legacy 'equipement' axis and filtering by prefix.
 
         Args:
             axis_name: Classification axis name
@@ -570,10 +582,24 @@ class DatabaseManager:
         # Get axes to query (include related axes if defined)
         axes_to_query = self.RELATED_AXES.get(axis_name, [axis_name])
 
+        # Get prefix filter if defined (for split axes)
+        prefix_filter = self.AXIS_PREFIX_FILTER.get(axis_name)
+
         # Get tags for this axis and related axes
         tags = []
         for ax in axes_to_query:
             tags.extend(self.get_tags_by_axis(ax))
+
+        # Fallback: if no tags found and this is a split axis,
+        # query the legacy 'equipement' axis and filter by prefix
+        if not tags and prefix_filter:
+            legacy_tags = self.get_tags_by_axis('equipement')
+            tags = [t for t in legacy_tags if t['prefix'] in prefix_filter]
+
+        # Apply prefix filter if defined
+        if tags and prefix_filter:
+            tags = [t for t in tags if t['prefix'] in prefix_filter]
+
         if tags:
             # Group by prefix
             by_prefix = {}
@@ -593,8 +619,10 @@ class DatabaseManager:
                     if tag.get('description'):
                         parts.append(f"    # {tag['description']}")
 
-        # Get constraints
+        # Get constraints — try axis-specific first, fallback to legacy
         constraints = self.get_constraints_for_axis(axis_name)
+        if not constraints and prefix_filter:
+            constraints = self.get_constraints_for_axis('equipement')
         if constraints:
             parts.append("")
             parts.append("## Contraintes:")

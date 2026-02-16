@@ -40,9 +40,10 @@ Le pipeline traite les axes dans l'ordre suivant:
 2. **type** - Type de mail (T_*, S_*)
 3. **projet** - Projet/Client/Affaire (P_*, C_*, A_*)
 4. **fournisseur** - Fournisseur (F_*)
-5. **equipement** - Equipement type et designation (EQT_*, EQ_*)
-6. **processus** - Essais et Technique (E_*, TC_*)
-7. **qualite** - Qualite, Jalons, Anomalies, NRB (Q_*, J_*, AN_*, NRB_*)
+5. **equipement_type** - Type d'equipement / famille produit (EQT_*)
+6. **equipement_designation** - Designation equipement / instance (EQ_*)
+7. **processus** - Essais et Technique (E_*, TC_*)
+8. **qualite** - Qualite, Jalons, Anomalies, NRB (Q_*, J_*, AN_*, NRB_*)
 
 ## Conventions
 
@@ -53,8 +54,8 @@ Le pipeline traite les axes dans l'ordre suivant:
 - `A_` : Affaire (YODA, SICRAL3, etc.)
 - `P_` : Projet (Projet_AD, NAC_ERO, etc.)
 - `F_` : Fournisseur
-- `EQT_` : Type d'equipement - famille produit
-- `EQ_` : Designation equipement - instance
+- `EQT_` : Type d'equipement - famille produit (axe equipement_type)
+- `EQ_` : Designation equipement - instance (axe equipement_designation)
 - `E_` : Essais et bancs d'essais
 - `TC_` : Technique - processus
 - `Q_` : Qualite
@@ -108,12 +109,13 @@ E_ uniquement si le mail mentionne explicitement:
 
 ### Confusion E_ vs EQ_
 - `E_` = Essais (axe processus) : BSI, BVT, VIBRATION, etc.
-- `EQ_` = Equipement designation (axe equipement) : CAM001, FM1, etc.
+- `EQ_` = Equipement designation (axe equipement_designation) : CAM001, FM1, etc.
 
 ### Dependencies entre Axes
 Defini dans `settings.json`:
 - `fournisseur` depend de `projet`
-- `equipement` depend de `projet` et `fournisseur`
+- `equipement_type` depend de `projet` et `fournisseur`
+- `equipement_designation` depend de `projet`, `fournisseur` et `equipement_type`
 
 ## Regles d'Inference v3.1
 Appliquees automatiquement apres la classification:
