@@ -79,6 +79,28 @@ class DatabaseManager:
 
     # ==================== Email Operations ====================
 
+    @staticmethod
+    def _convert_datetime(value):
+        """
+        Convert any datetime-like object to ISO format string for SQLite.
+        Handles pywintypes.datetime from Outlook COM, Python datetime, etc.
+
+        Args:
+            value: A datetime-like object or string
+
+        Returns:
+            ISO format string or None
+        """
+        if value is None:
+            return None
+        if isinstance(value, str):
+            return value
+        # Handle pywintypes.datetime and Python datetime
+        try:
+            return value.strftime('%Y-%m-%d %H:%M:%S')
+        except (AttributeError, TypeError):
+            return str(value)
+
     def insert_email(self, email_data: Dict[str, Any]) -> int:
         """
         Insert email into database.
@@ -89,6 +111,9 @@ class DatabaseManager:
         Returns:
             email_id of inserted email
         """
+        # Convert received_time to string to avoid pywintypes.datetime binding error
+        received_time = self._convert_datetime(email_data.get('received_time'))
+
         cursor = self.connection.execute("""
             INSERT INTO emails (
                 conversation_id, subject, sender_email, sender_name,
@@ -102,7 +127,7 @@ class DatabaseManager:
             email_data.get('sender_name', ''),
             email_data.get('recipients', ''),
             email_data['body'],
-            email_data.get('received_time'),
+            received_time,
             email_data.get('conversation_topic', ''),
             email_data.get('outlook_categories', '')
         ))

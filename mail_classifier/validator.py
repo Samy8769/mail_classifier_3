@@ -103,6 +103,17 @@ class TagValidator:
             if not tag:
                 continue
 
+            # Step 0: Reject tags without known prefix (e.g., YCE, AURICAM_EGSE009_FS)
+            prefix, _ = self._extract_prefix(tag)
+            if prefix is None:
+                rejected_tags.append((tag, "no known prefix"))
+                continue
+
+            # Step 0b: Reject tags with double/compound prefixes (e.g., E_TC_DFC)
+            if self._has_double_prefix(tag):
+                rejected_tags.append((tag, "double/compound prefix"))
+                continue
+
             # Step 1: Exact match in DB
             if tag in valid_tags_db:
                 valid_tags.append(tag)
@@ -144,12 +155,39 @@ class TagValidator:
                 return prefix, tag[len(prefix):]
         return None, tag
 
+    def _get_same_axis_prefixes(self, prefix: str) -> list:
+        """
+        Get all prefixes belonging to the same axis as the given prefix.
+
+        Args:
+            prefix: A known prefix (e.g., 'EQT_')
+
+        Returns:
+            List of prefixes in the same axis
+        """
+        axis = self.PREFIX_TO_AXIS.get(prefix)
+        if not axis:
+            return []
+        return [p for p, a in self.PREFIX_TO_AXIS.items() if a == axis]
+
+    def _has_double_prefix(self, tag: str) -> bool:
+        """
+        Detect tags with double/compound prefixes like E_TC_DFC.
+        Returns True if the remainder after the first prefix starts with another prefix.
+        """
+        prefix, remainder = self._extract_prefix(tag)
+        if prefix and remainder:
+            inner_prefix, _ = self._extract_prefix(remainder)
+            if inner_prefix:
+                return True
+        return False
+
     def _try_correct_tag(self, tag: str, valid_tags_db: Set[str]) -> Optional[str]:
         """
         Attempt to correct an invalid tag to a valid one.
+        Conservative approach: only correct within the same axis.
         Handles common LLM errors:
           - Double prefix: C_A_YODA → A_YODA
-          - Wrong prefix: C_DFC → PC_DFC
           - Rule leakage: EQT_Find_EQ_ → rejected
           - Instruction leakage: EQT_If_EQT_inventé → rejected
 
@@ -170,46 +208,39 @@ class TagValidator:
             if re.search(pattern, tag):
                 return None
 
-        # Strategy 1: The tag name (without its prefix) may be a valid tag
-        # with a different prefix. e.g., C_A_YODA → A_YODA exists in DB
+        # Reject tags without known prefix (e.g., YCE, AURICAM_EGSE009_FS)
         prefix, remainder = self._extract_prefix(tag)
+        if prefix is None:
+            return None
+
+        # Reject tags with double/compound prefixes (e.g., E_TC_DFC)
+        if self._has_double_prefix(tag):
+            logger.debug(f"Rejecting double-prefix tag: {tag}")
+            return None
+
+        # Strategy 1: The remainder (after first prefix) may be a valid tag
+        # e.g., C_A_YODA → A_YODA exists in DB
         if prefix and remainder:
-            # Check if the remainder itself is a valid tag (double prefix case)
             if remainder in valid_tags_db:
                 return remainder
 
-            # Check if remainder starts with another known prefix
-            inner_prefix, inner_remainder = self._extract_prefix(remainder)
-            if inner_prefix and f"{inner_prefix}{inner_remainder}" in valid_tags_db:
-                return f"{inner_prefix}{inner_remainder}"
-
-        # Strategy 2: Try all known prefixes with the base name
-        # Extract the base name (everything after all prefixes)
-        base_name = tag
-        for pfx in self.KNOWN_PREFIXES:
-            if base_name.startswith(pfx):
-                base_name = base_name[len(pfx):]
-                break
-
-        if base_name:
-            for try_prefix in self.KNOWN_PREFIXES:
-                candidate = f"{try_prefix}{base_name}"
+        # Strategy 2: Try SAME-AXIS prefixes only with the base name
+        # e.g., EQ_xxx → try EQT_xxx (both in 'equipement' axis)
+        # NEVER try cross-axis corrections (e.g., EQT_AQM → Q_AQM)
+        if remainder:
+            same_axis_prefixes = self._get_same_axis_prefixes(prefix)
+            for try_prefix in same_axis_prefixes:
+                if try_prefix == prefix:
+                    continue  # Already tried exact match
+                candidate = f"{try_prefix}{remainder}"
                 if candidate in valid_tags_db:
                     return candidate
 
-        # Strategy 3: Case-insensitive match
+        # Strategy 3: Case-insensitive exact match
         tag_lower = tag.lower()
         for valid_tag in valid_tags_db:
             if valid_tag.lower() == tag_lower:
                 return valid_tag
-
-        # Strategy 4: Substring match - tag name contained in a valid tag
-        # Only for sufficiently long base names to avoid false matches
-        if base_name and len(base_name) >= 3:
-            for valid_tag in valid_tags_db:
-                valid_prefix, valid_remainder = self._extract_prefix(valid_tag)
-                if valid_remainder and valid_remainder.lower() == base_name.lower():
-                    return valid_tag
 
         return None
 
