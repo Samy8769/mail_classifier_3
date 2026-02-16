@@ -1,0 +1,44 @@
+outlook_categories_referential:
+ metadata:
+   version: "2.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   clients:
+     prefix: "C_"
+     description: "Clients finaux"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - C_AGS
+       - C_ADS
+       - C_ESA
+       - C_CNES
+       - C_TAS-I
+       - C_TAS-F
+       - C_GMV
+       - C_ASTROSCALE_US
+       - C_JHU_APL
+       - C_OHB
+       - C_Infinite Orbit
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "C_ DOIT être EXACTEMENT une valeur de la liste clients ci-dessus (C_AGS, C_ADS, C_ESA, etc.)"
+   - "Ne JAMAIS inventer de C_ - si le client n'est pas dans la liste, ne pas retourner de C_"
+   - "Ne pas confondre C_ (clients) avec TC_ (technique) ou PC_ (autre préfixe)"
+   - "Only C_ tags are expected in this axis"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"

@@ -1,0 +1,45 @@
+outlook_categories_referential:
+ metadata:
+   version: "2.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   affaires:
+     prefix: "A_"
+     description: "Affaires commerciales (multi-affaires autorisées)"
+     multiplicity: "0..n"
+     list_type: "closed"
+     format: "A_<VALEUR_CENTRALE>"
+     rules:
+       - "Toute affaire implique la catégorie client correspondante"
+     values:
+       - A_YODA
+       - A_PROTECTION OF GALILEO
+       - A_SICRAL3
+       - A_EUROPA SKYNET6
+       - A_IOD ESA
+       - A_€ROSS
+       - A_CASPER
+       - A_COSMIC
+       - A_EGIDE
+       - A_ARGONAUT
+       - A_MERCURY
+       - A_NFI
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "Only A_ tags are expected in this axis"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"

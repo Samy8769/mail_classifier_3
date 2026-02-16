@@ -1,0 +1,61 @@
+outlook_categories_referential:
+ metadata:
+   version: "2.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   jalons:
+     prefix: "J_"
+     description: "Jalons et revues projet (spatial)"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - Appel d'offre
+       - Kickoff
+       - Lancement
+       - Avancement
+       - SRR
+       - PDR
+       - CDR
+       - SRR FPGA
+       - PDR FPGA
+       - CDR FPGA
+       - TRR
+       - DRB
+       - TRB
+       - MPCB
+       - EQSR
+       - PCB
+       - FAI
+       - RLF
+       - QR
+       - KIP
+       - MIP
+       - Livraison
+       - Cloture
+
+ inference_rules:
+   - if: "J_ present"
+     then:
+       - add: "T_Projet"
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "IA must not delete existing categories"
+   - "Only J_ tags are expected in this axis"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"
+   - "YCE = YODA_CE"
+   - "YCL = YODA_CL"

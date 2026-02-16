@@ -1,4 +1,4 @@
-# Mail Classifier v3.1
+# Mail Classifier v3.2
 
 ## Description
 Classificateur d'emails Outlook base sur IA multi-axes pour l'industrie spatiale.
@@ -28,43 +28,53 @@ mail_classifier_v3/
 │   └── vector_store.py       # Embeddings pour recherche
 ├── config/
 │   ├── settings.json         # Configuration principale
-│   └── prompt_mail_*.txt     # Prompts par axe
+│   └── prompt_mail_*.txt     # Prompts par axe (1 fichier par prefixe)
 ├── migrations/               # Scripts de migration DB
 └── main.py                   # CLI entry point
 ```
 
 ## Axes de Classification
 
+Chaque prefixe est traite par un appel LLM independant.
 Le pipeline traite les axes dans l'ordre suivant:
+
 1. **resume** - Resume de l'email
-2. **type** - Type de mail (T_*, S_*)
-3. **projet** - Projet/Client/Affaire (P_*, C_*, A_*)
-4. **fournisseur** - Fournisseur (F_*)
-5. **equipement_type** - Type d'equipement / famille produit (EQT_*)
-6. **equipement_designation** - Designation equipement / instance (EQ_*)
-7. **processus** - Essais et Technique (E_*, TC_*)
-8. **qualite** - Qualite, Jalons, Anomalies, NRB (Q_*, J_*, AN_*, NRB_*)
+2. **type_mail** - Type de mail (T_*)
+3. **statut** - Statut et action (S_*)
+4. **client** - Client final (C_*)
+5. **affaire** - Affaire commerciale (A_*)
+6. **projet** - Projet technique (P_*)
+7. **fournisseur** - Fournisseur (F_*)
+8. **equipement_type** - Type d'equipement / famille produit (EQT_*)
+9. **equipement_designation** - Designation equipement / instance (EQ_*)
+10. **essais** - Essais et bancs d'essais (E_*)
+11. **technique** - Processus technique (TC_*)
+12. **qualite** - Qualite (Q_*)
+13. **jalons** - Jalons et revues projet (J_*)
+14. **anomalies** - Anomalies et non-conformites (AN_*)
+15. **nrb** - Nonconformance Review Board (NRB_*)
 
 ## Conventions
 
 ### Prefixes de Categories
-- `T_` : Type de mail (Projet, Qualite, Technique, etc.)
-- `S_` : Statut (Urgent, Action_Requise, etc.)
-- `C_` : Client (AGS, ADS, ESA, etc.)
-- `A_` : Affaire (YODA, SICRAL3, etc.)
-- `P_` : Projet (Projet_AD, NAC_ERO, etc.)
-- `F_` : Fournisseur
+- `T_` : Type de mail (axe type_mail)
+- `S_` : Statut (axe statut)
+- `C_` : Client (axe client)
+- `A_` : Affaire (axe affaire)
+- `P_` : Projet (axe projet)
+- `F_` : Fournisseur (axe fournisseur)
 - `EQT_` : Type d'equipement - famille produit (axe equipement_type)
 - `EQ_` : Designation equipement - instance (axe equipement_designation)
-- `E_` : Essais et bancs d'essais
-- `TC_` : Technique - processus
-- `Q_` : Qualite
-- `J_` : Jalons
-- `AN_` : Anomalies
-- `NRB_` : Nonconformance Review Board
+- `E_` : Essais et bancs d'essais (axe essais)
+- `TC_` : Technique - processus (axe technique)
+- `Q_` : Qualite (axe qualite)
+- `J_` : Jalons (axe jalons)
+- `AN_` : Anomalies (axe anomalies)
+- `NRB_` : Nonconformance Review Board (axe nrb)
 
-### Configuration v3.1
+### Configuration v3.2
 - Les prompts dans `config/prompt_mail_*.txt` definissent le comportement LLM
+- **Un fichier prompt et un fichier regles par prefixe**
 - **Les regles sont stockees dans la base de donnees**
 - `settings.json` definit l'ordre des axes et leurs dependances
 - `database.enabled: true` active le stockage des regles en DB
@@ -89,10 +99,14 @@ python main.py db-status
 
 ## Points d'Attention
 
-### Categorisation C_ et P_ (Clients/Projets)
-C_ et P_ sont des listes FERMEES:
+### Categorisation C_ (Clients)
+C_ est une liste FERMEE:
 - Seules les valeurs definies sont autorisees
-- Ne jamais inventer de C_ ou P_ non liste
+- Ne jamais inventer de C_ non liste
+
+### Categorisation P_ (Projets)
+P_ est une liste FERMEE:
+- Ne jamais inventer de P_ non liste
 - En cas de doute sur P_, utiliser P_Projet_AD
 
 ### Categorisation F_ (Fournisseurs)
@@ -108,14 +122,20 @@ E_ uniquement si le mail mentionne explicitement:
 - PAS juste la mention de "vibrations" ou "chocs"
 
 ### Confusion E_ vs EQ_
-- `E_` = Essais (axe processus) : BSI, BVT, VIBRATION, etc.
+- `E_` = Essais (axe essais) : BSI, BVT, VIBRATION, etc.
 - `EQ_` = Equipement designation (axe equipement_designation) : CAM001, FM1, etc.
 
 ### Dependencies entre Axes
 Defini dans `settings.json`:
+- `statut` depend de `type_mail`
+- `affaire` depend de `client`
+- `projet` depend de `client` et `affaire`
 - `fournisseur` depend de `projet`
 - `equipement_type` depend de `projet` et `fournisseur`
 - `equipement_designation` depend de `projet`, `fournisseur` et `equipement_type`
+- `essais` et `technique` dependent de `projet`
+- `qualite`, `jalons`, `anomalies` dependent de `type_mail` et `projet`
+- `nrb` depend de `type_mail`, `projet` et `anomalies`
 
 ## Regles d'Inference v3.1
 Appliquees automatiquement apres la classification:
@@ -134,9 +154,11 @@ python test_integration.py
 ```bash
 python main.py db-status
 python main.py db-migrate
+# Migration pour splitter les axes existants:
+python migrations/007_split_all_axes.py
 ```
 
-### Modules cles v3.1
+### Modules cles v3.2
 - `constants.py` : Constantes nommees (OutlookFolders.INBOX = 6, etc.)
 - `logger.py` : Logging centralise (remplace les print())
 - `utils.py` : `parse_categories()`, `merge_category_sets()`

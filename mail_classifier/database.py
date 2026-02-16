@@ -546,16 +546,44 @@ class DatabaseManager:
     # Related axes mapping: when building rules for an axis,
     # include tags from these related axes as well
     RELATED_AXES = {
-        'qualite': ['qualite', 'jalons', 'anomalies', 'nrb'],
+        'type_mail': ['type_mail'],
+        'statut': ['statut'],
+        'client': ['client'],
+        'affaire': ['affaire'],
         'equipement_type': ['equipement_type'],
         'equipement_designation': ['equipement_designation'],
+        'essais': ['essais'],
+        'technique': ['technique'],
     }
 
     # Prefix filter: when reconstructing rules for a split axis,
     # only include tags with these prefixes
     AXIS_PREFIX_FILTER = {
+        'type_mail': ['T_'],
+        'statut': ['S_'],
+        'client': ['C_'],
+        'affaire': ['A_'],
+        'projet': ['P_'],
         'equipement_type': ['EQT_'],
         'equipement_designation': ['EQ_'],
+        'essais': ['E_'],
+        'technique': ['TC_'],
+        'qualite': ['Q_'],
+        'jalons': ['J_'],
+        'anomalies': ['AN_'],
+        'nrb': ['NRB_'],
+    }
+
+    # Legacy axis names mapping: map new axis names to their legacy DB axis names
+    LEGACY_AXIS_MAP = {
+        'type_mail': 'type',
+        'statut': 'type',
+        'client': 'projet',
+        'affaire': 'projet',
+        'equipement_type': 'equipement',
+        'equipement_designation': 'equipement',
+        'essais': 'processus',
+        'technique': 'processus',
     }
 
     def reconstruct_full_rules(self, axis_name: str) -> str:
@@ -591,10 +619,12 @@ class DatabaseManager:
             tags.extend(self.get_tags_by_axis(ax))
 
         # Fallback: if no tags found and this is a split axis,
-        # query the legacy 'equipement' axis and filter by prefix
+        # query the legacy axis and filter by prefix
         if not tags and prefix_filter:
-            legacy_tags = self.get_tags_by_axis('equipement')
-            tags = [t for t in legacy_tags if t['prefix'] in prefix_filter]
+            legacy_axis = self.LEGACY_AXIS_MAP.get(axis_name)
+            if legacy_axis:
+                legacy_tags = self.get_tags_by_axis(legacy_axis)
+                tags = [t for t in legacy_tags if t['prefix'] in prefix_filter]
 
         # Apply prefix filter if defined
         if tags and prefix_filter:
@@ -621,8 +651,8 @@ class DatabaseManager:
 
         # Get constraints — try axis-specific first, fallback to legacy
         constraints = self.get_constraints_for_axis(axis_name)
-        if not constraints and prefix_filter:
-            constraints = self.get_constraints_for_axis('equipement')
+        if not constraints and axis_name in self.LEGACY_AXIS_MAP:
+            constraints = self.get_constraints_for_axis(self.LEGACY_AXIS_MAP[axis_name])
         if constraints:
             parts.append("")
             parts.append("## Contraintes:")

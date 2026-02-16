@@ -1,0 +1,54 @@
+outlook_categories_referential:
+ metadata:
+   version: "2.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   technique:
+     prefix: "TC_"
+     description: "Processus de fabrication, traitement, contrôle, transport, logistique"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - TC_DFC
+       - TC_Commande
+       - TC_Devis
+       - TC_Achats
+       - TC_Outillages
+       - TC_Transport
+       - TC_Inspection
+       - TC_Emballage
+       - TC_Propreté
+       - TC_EMC
+       - TC_ESD
+       - TC_Spécifications
+       - TC_Radiations
+       - TC_Collage
+       - TC_Bake-out
+       - TC_SSM_ITO
+       - TC_Sertissage
+       - TC_Anti_Reflet
+       - TC_Lumière_Parasite
+       - TC_Bulles
+       - TC_Stabilité
+       - TC_Peinture
+       - TC_Détermination_cale
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "IA must not delete existing categories"
+   - "Only TC_ tags are expected in this axis"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"

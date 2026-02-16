@@ -26,13 +26,28 @@ classification:
       prompt_file: "prompt_mail_resume.txt"
       regles_file: null
 
-    - name: "type"
-      prompt_file: "prompt_mail_type.txt"
-      regles_file: "regles_mail_type.txt"
+    - name: "type_mail"
+      prompt_file: "prompt_mail_type_mail.txt"
+      regles_file: "regles_mail_type_mail.txt"
+
+    - name: "statut"
+      prompt_file: "prompt_mail_statut.txt"
+      regles_file: "regles_mail_statut.txt"
+      dependencies: ["type_mail"]
+
+    - name: "client"
+      prompt_file: "prompt_mail_client.txt"
+      regles_file: "regles_mail_client.txt"
+
+    - name: "affaire"
+      prompt_file: "prompt_mail_affaire.txt"
+      regles_file: "regles_mail_affaire.txt"
+      dependencies: ["client"]
 
     - name: "projet"
-      prompt_file: "prompt_mail_projet.txt"
-      regles_file: "regles_mail_projet.txt"
+      prompt_file: "prompt_mail_projet_only.txt"
+      regles_file: "regles_mail_projet_only.txt"
+      dependencies: ["client", "affaire"]
 
     - name: "fournisseur"
       prompt_file: "prompt_mail_fournisseur.txt"
@@ -49,9 +64,35 @@ classification:
       regles_file: "regles_mail_equipement_designation.txt"
       dependencies: ["projet", "fournisseur", "equipement_type"]
 
-    - name: "processus"
-      prompt_file: "prompt_mail_processus.txt"
-      regles_file: "regles_mail_processus.txt"
+    - name: "essais"
+      prompt_file: "prompt_mail_essais.txt"
+      regles_file: "regles_mail_essais.txt"
+      dependencies: ["projet"]
+
+    - name: "technique"
+      prompt_file: "prompt_mail_technique.txt"
+      regles_file: "regles_mail_technique.txt"
+      dependencies: ["projet"]
+
+    - name: "qualite"
+      prompt_file: "prompt_mail_qualite_only.txt"
+      regles_file: "regles_mail_qualite_only.txt"
+      dependencies: ["type_mail", "projet"]
+
+    - name: "jalons"
+      prompt_file: "prompt_mail_jalons.txt"
+      regles_file: "regles_mail_jalons.txt"
+      dependencies: ["type_mail", "projet"]
+
+    - name: "anomalies"
+      prompt_file: "prompt_mail_anomalies.txt"
+      regles_file: "regles_mail_anomalies.txt"
+      dependencies: ["type_mail", "projet"]
+
+    - name: "nrb"
+      prompt_file: "prompt_mail_nrb.txt"
+      regles_file: "regles_mail_nrb.txt"
+      dependencies: ["type_mail", "projet", "anomalies"]
 
 # State Persistence
 state:
