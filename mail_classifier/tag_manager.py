@@ -19,23 +19,23 @@ class TagManager:
 
     # Valid classification axes
     VALID_AXES = [
-        'type', 'projet', 'fournisseur',
-        'equipement_type', 'equipement_designation',
-        'processus', 'qualite', 'jalons', 'anomalies', 'nrb'
+        'type_mail', 'statut', 'client', 'affaire', 'projet',
+        'fournisseur', 'equipement_type', 'equipement_designation',
+        'essais', 'technique', 'qualite', 'jalons', 'anomalies', 'nrb'
     ]
 
     # Prefix mapping for auto-detection
     PREFIX_MAP = {
-        'T_': 'type',
-        'S_': 'type',      # Status tags
+        'T_': 'type_mail',
+        'S_': 'statut',
+        'C_': 'client',
+        'A_': 'affaire',
         'P_': 'projet',
-        'A_': 'projet',    # Affairs
-        'C_': 'projet',    # Clients
         'F_': 'fournisseur',
         'EQT_': 'equipement_type',
         'EQ_': 'equipement_designation',
-        'E_': 'processus',
-        'TC_': 'processus',
+        'E_': 'essais',
+        'TC_': 'technique',
         'Q_': 'qualite',
         'J_': 'jalons',
         'AN_': 'anomalies',

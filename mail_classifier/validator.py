@@ -23,21 +23,21 @@ class TagValidator:
 
     # Known prefixes and their axes
     PREFIX_TO_AXIS = {
-        'T_': 'type',
-        'S_': 'type',
+        'T_': 'type_mail',
+        'S_': 'statut',
+        'C_': 'client',
+        'A_': 'affaire',
         'P_': 'projet',
-        'A_': 'projet',
-        'C_': 'projet',
         'F_': 'fournisseur',
         'EQT_': 'equipement_type',
         'EQ_': 'equipement_designation',
-        'E_': 'processus',
-        'TC_': 'processus',
-        'PC_': 'processus',
+        'E_': 'essais',
+        'TC_': 'technique',
+        'PC_': 'technique',
         'Q_': 'qualite',
-        'J_': 'qualite',
-        'AN_': 'qualite',
-        'NRB_': 'qualite',
+        'J_': 'jalons',
+        'AN_': 'anomalies',
+        'NRB_': 'nrb',
     }
 
     # All known prefixes sorted by length descending (longest match first)
@@ -378,8 +378,14 @@ Si les tags sont INVALIDES, réponds : "INVALID: [raison]" suivi de la liste cor
 
         # Legacy axis fallback: map split axis names to legacy DB names
         LEGACY_AXIS_FALLBACK = {
+            'type_mail': 'type',
+            'statut': 'type',
+            'client': 'projet',
+            'affaire': 'projet',
             'equipement_type': 'equipement',
             'equipement_designation': 'equipement',
+            'essais': 'processus',
+            'technique': 'processus',
         }
 
         for axis in axes_detected:

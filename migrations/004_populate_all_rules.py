@@ -26,12 +26,16 @@ class RulesMigrator:
 
     # Mapping of axis names to their expected prefixes
     AXIS_PREFIX_MAP = {
-        'type': ['T_', 'S_'],
-        'projet': ['P_', 'C_', 'A_'],
+        'type_mail': ['T_'],
+        'statut': ['S_'],
+        'client': ['C_'],
+        'affaire': ['A_'],
+        'projet': ['P_'],
         'fournisseur': ['F_'],
         'equipement_type': ['EQT_'],
         'equipement_designation': ['EQ_'],
-        'processus': ['E_', 'TC_'],
+        'essais': ['E_'],
+        'technique': ['TC_'],
         'qualite': ['Q_'],
         'jalons': ['J_'],
         'anomalies': ['AN_'],
@@ -40,13 +44,20 @@ class RulesMigrator:
 
     # Files to process and their axis mappings
     FILES_CONFIG = {
-        'regles_mail_type.txt': ['type'],
-        'regles_mail_projet.txt': ['projet'],
+        'regles_mail_type_mail.txt': ['type_mail'],
+        'regles_mail_statut.txt': ['statut'],
+        'regles_mail_client.txt': ['client'],
+        'regles_mail_affaire.txt': ['affaire'],
+        'regles_mail_projet_only.txt': ['projet'],
         'regles_mail_fournisseur.txt': ['fournisseur'],
         'regles_mail_equipement_type.txt': ['equipement_type'],
         'regles_mail_equipement_designation.txt': ['equipement_designation'],
-        'regles_mail_processus.txt': ['processus'],
-        'regles_mail_qualité.txt': ['qualite', 'jalons', 'anomalies', 'nrb'],
+        'regles_mail_essais.txt': ['essais'],
+        'regles_mail_technique.txt': ['technique'],
+        'regles_mail_qualite_only.txt': ['qualite'],
+        'regles_mail_jalons.txt': ['jalons'],
+        'regles_mail_anomalies.txt': ['anomalies'],
+        'regles_mail_nrb.txt': ['nrb'],
     }
 
     def __init__(self, db_path: str, config_dir: str):

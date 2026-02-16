@@ -1,0 +1,53 @@
+outlook_categories_referential:
+ metadata:
+   version: "2.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   projets:
+     prefix: "P_"
+     description: "Projets techniques"
+     multiplicity: "1..n"
+     list_type: "closed"
+     values:
+       - P_Projet_AD
+       - P_NAC_ERO
+       - P_YODA_CL
+       - P_YODA_CE
+       - P_AURIGA
+       - P_AURIGA_V2
+       - P_FS_NUMERIQUE
+       - P_IRIS²
+       - P_HiCam D2
+       - P_PANOPTES
+       - P_PADAWAN
+       - P_PARADIGM
+       - P_FABRIQ
+       - P_EPSILON3
+       - P_OVS
+       - P_AURICAM_4K
+       - P_JENKINS
+       - P_PYTHON
+       - P_N8N
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "if P_ category is not certain, indicate Projet_AD"
+   - "P_ DOIT être EXACTEMENT une valeur de la liste projets ci-dessus - ne JAMAIS inventer (ex: P_CAM_X est INTERDIT)"
+   - "Only P_ tags are expected in this axis"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"
+   - "YCE = YODA_CE"
+   - "YCL = YODA_CL"

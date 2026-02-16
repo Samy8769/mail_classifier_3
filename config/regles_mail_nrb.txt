@@ -1,0 +1,43 @@
+outlook_categories_referential:
+ metadata:
+   version: "2.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   nrb:
+     prefix: "NRB_"
+     description: "Nonconformance Review Board"
+     multiplicity: "0..n"
+     rules:
+       - "Implique T_Qualite"
+       - "Implique S_Action_Requise"
+     values:
+       - Preparation
+       - En_Cours
+       - Cloturee
+       - Action
+
+ inference_rules:
+   - if: "NRB_ present"
+     then:
+       - add: "T_Qualite"
+       - add: "S_Action_Requise"
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "IA must not delete existing categories"
+   - "Only NRB_ tags are expected in this axis"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"
