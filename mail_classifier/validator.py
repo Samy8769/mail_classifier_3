@@ -29,8 +29,8 @@ class TagValidator:
         'A_': 'projet',
         'C_': 'projet',
         'F_': 'fournisseur',
-        'EQT_': 'equipement',
-        'EQ_': 'equipement',
+        'EQT_': 'equipement_type',
+        'EQ_': 'equipement_designation',
         'E_': 'processus',
         'TC_': 'processus',
         'PC_': 'processus',
@@ -376,8 +376,20 @@ Si les tags sont INVALIDES, réponds : "INVALID: [raison]" suivi de la liste cor
         allowed_tags = {}
         multiplicity_rules = {}
 
+        # Legacy axis fallback: map split axis names to legacy DB names
+        LEGACY_AXIS_FALLBACK = {
+            'equipement_type': 'equipement',
+            'equipement_designation': 'equipement',
+        }
+
         for axis in axes_detected:
             db_tags = self.db.get_tags_by_axis(axis)
+            # Fallback to legacy axis name if no tags found
+            if not db_tags and axis in LEGACY_AXIS_FALLBACK:
+                db_tags = self.db.get_tags_by_axis(LEGACY_AXIS_FALLBACK[axis])
+                # Filter by prefix for the specific split axis
+                prefix_filter = [p for p, a in self.PREFIX_TO_AXIS.items() if a == axis]
+                db_tags = [t for t in db_tags if any(t['tag_name'].startswith(p) for p in prefix_filter)]
             # Show ALL tags, not truncated
             allowed_tags[axis] = [t['tag_name'] for t in db_tags]
 

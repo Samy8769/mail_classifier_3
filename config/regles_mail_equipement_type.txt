@@ -1,0 +1,62 @@
+outlook_categories_referential:
+ metadata:
+   version: "2.0"
+   domain: "Spatial"
+   usage: "Outlook categories only, no folders"
+   classification_mode: "multi-axis"
+   governance: "IA assisted, human validated"
+
+ axes:
+
+   equipement_types:
+     prefix: "EQT_"
+     description: "Type d'équipement (famille produit)"
+     multiplicity: "0..n"
+     list_type: "closed"
+     values:
+       - EQT_Camera
+       - EQT_Module
+       - EQT_Viseur
+       - EQT_Objectif
+       - EQT_Telescope
+       - EQT_Lentilles
+       - EQT_Carte_Electronique
+       - EQT_Banc_Essai
+       - EQT_Baffle
+       - EQT_Barillet
+       - EQT_EGSE
+       - EQT_OGSE
+       - EQT_MGSE
+       - EQT_Electronic Unit
+       - EQT_Câbles
+       - EQT_Hélicoils
+       - EQT_Entretoises
+       - EQT_Vis
+       - EQT_Plan de pose
+       - EQT_Cube de visée
+       - EQT_Réchauffeur
+       - EQT_PCB
+       - EQT_Connecteurs
+       - EQT_Savers
+       - EQT_Diaphragmes
+       - EQT_Pads
+       - EQT_FPGA
+       - EQT_Miroir
+       - EQT_CTA
+       - EQT_Verrouillages
+       - EQT_Tresses Thermiques
+
+ constraints:
+   - "No Outlook folders are used"
+   - "Categories must respect defined prefixes"
+   - "IA must not delete existing categories"
+   - "Only EQT_ tags are expected in this axis"
+
+Definitions:
+   - "DFC = préparation des dossiers de fabrication et contrôle, mise à jour des fiches suiveuses, procédures, RINT, plans d'essais, rapport d'essais, etc.."
+   - "EMC = Electromagnetic compatibility"
+   - "ESD = ElectroStatic Discharge"
+   - "Propreté = pollution moléculaire ou particulaire"
+   - "Anti_Reflet = traitement de surface anti reflet effectué sur les lentilles et optiques"
+   - "AQM = traitement d'anomalie"
+   - "ECR = traitement du changement"

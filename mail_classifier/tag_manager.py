@@ -19,8 +19,9 @@ class TagManager:
 
     # Valid classification axes
     VALID_AXES = [
-        'type', 'projet', 'fournisseur', 'equipement', 'processus',
-        'qualite', 'jalons', 'anomalies', 'nrb'
+        'type', 'projet', 'fournisseur',
+        'equipement_type', 'equipement_designation',
+        'processus', 'qualite', 'jalons', 'anomalies', 'nrb'
     ]
 
     # Prefix mapping for auto-detection
@@ -31,8 +32,8 @@ class TagManager:
         'A_': 'projet',    # Affairs
         'C_': 'projet',    # Clients
         'F_': 'fournisseur',
-        'EQT_': 'equipement',
-        'EQ_': 'equipement',
+        'EQT_': 'equipement_type',
+        'EQ_': 'equipement_designation',
         'E_': 'processus',
         'TC_': 'processus',
         'Q_': 'qualite',

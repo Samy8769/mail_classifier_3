@@ -40,10 +40,16 @@
         "dependencies": ["projet"]
       },
       {
-        "name": "equipement",
-        "prompt_file": "prompt_mail_equipement.txt",
-        "regles_file": "regles_mail_equipement.txt",
+        "name": "equipement_type",
+        "prompt_file": "prompt_mail_equipement_type.txt",
+        "regles_file": "regles_mail_equipement_type.txt",
         "dependencies": ["projet", "fournisseur"]
+      },
+      {
+        "name": "equipement_designation",
+        "prompt_file": "prompt_mail_equipement_designation.txt",
+        "regles_file": "regles_mail_equipement_designation.txt",
+        "dependencies": ["projet", "fournisseur", "equipement_type"]
       },
       {
         "name": "processus",
