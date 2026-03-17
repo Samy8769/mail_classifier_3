@@ -30,15 +30,47 @@ __author__ = "Your Name"
 __license__ = "MIT"
 
 from .config import Config, ConfigError, AxisConfig
-from .email_client import EmailClient
-from .categorizer import Categorizer
-from .api_client import ParadigmAPIClient, APIError
-from .state_manager import StateManager
 from .constants import OutlookFolders
 from .utils import parse_categories, merge_category_sets
 from .logger import get_logger, setup_logger
 
+# Optional: requires openai, httpx
+try:
+    from .api_client import ParadigmAPIClient, APIError
+    from .state_manager import StateManager
+except ImportError:
+    ParadigmAPIClient = None  # type: ignore[assignment,misc]
+    APIError = None           # type: ignore[assignment,misc]
+    StateManager = None       # type: ignore[assignment,misc]
+
+# Windows-only Outlook COM components (not available on Linux/macOS)
+try:
+    from .email_client import EmailClient
+    from .categorizer import Categorizer
+except ImportError:
+    EmailClient = None  # type: ignore[assignment,misc]
+    Categorizer = None  # type: ignore[assignment,misc]
+
+# v3.2 – Hybrid heuristic + LLM pipeline
+from .heuristic_engine import (
+    TextNormalizer,
+    AhoCorasickMatcher,
+    SerialNumberExtractor,
+    AxisKeywordConfig,
+    AxisHeuristicPipeline,
+    AxisHeuristicResult,
+    CandidateMatch,
+)
+from .axis_keywords import AXIS_CONFIGS, get_axis_config, get_all_axis_names
+from .hybrid_pipeline import (
+    HybridClassificationPipeline,
+    HybridAxisClassifier,
+    HybridClassificationOutput,
+    AxisClassificationResult,
+)
+
 __all__ = [
+    # Core
     'Config',
     'ConfigError',
     'AxisConfig',
@@ -52,4 +84,21 @@ __all__ = [
     'merge_category_sets',
     'get_logger',
     'setup_logger',
+    # Heuristic engine (v3.2)
+    'TextNormalizer',
+    'AhoCorasickMatcher',
+    'SerialNumberExtractor',
+    'AxisKeywordConfig',
+    'AxisHeuristicPipeline',
+    'AxisHeuristicResult',
+    'CandidateMatch',
+    # Axis keyword configs (v3.2)
+    'AXIS_CONFIGS',
+    'get_axis_config',
+    'get_all_axis_names',
+    # Hybrid pipeline (v3.2)
+    'HybridClassificationPipeline',
+    'HybridAxisClassifier',
+    'HybridClassificationOutput',
+    'AxisClassificationResult',
 ]
