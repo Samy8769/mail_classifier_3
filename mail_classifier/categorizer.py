@@ -21,7 +21,8 @@ class Categorizer:
 
     def __init__(self, config: Config, api_client: ParadigmAPIClient,
                  state_manager: StateManager,
-                 db=None, chunker=None, validator=None, vector_store=None):
+                 db=None, chunker=None, validator=None, vector_store=None,
+                 pipeline=None):
         """
         Initialize categorizer.
 
@@ -33,6 +34,7 @@ class Categorizer:
             chunker: Optional EmailChunker for long emails (v2.0)
             validator: Optional TagValidator for validation (v2.0)
             vector_store: Optional VectorStore for embeddings (v2.0)
+            pipeline: Optional ClassificationPipeline for local-first classification (v3.3)
         """
         self.config = config
         self.api = api_client
@@ -44,6 +46,10 @@ class Categorizer:
         self.chunker = chunker
         self.validator = validator
         self.vector_store = vector_store
+
+        # v3.3: Local-first classification pipeline (Aho-Corasick + Regex + Scoring)
+        self.pipeline = pipeline
+        self.use_pipeline = pipeline is not None and self._get_config_value('pipeline', 'enabled', False)
 
         # Feature flags from config
         self.use_chunking = chunker is not None and self._get_config_value('chunking', 'enabled', False)
@@ -290,8 +296,8 @@ class Categorizer:
                       context: Dict[str, str]) -> str:
         """
         Classify on a single axis with optional context from dependencies.
-        Enhanced v2.0 with database-backed rules.
-        Extracted per-axis logic from lines 249-273.
+        v3.3: Tries local pipeline first (Aho-Corasick + Regex + Scoring),
+        falls back to full LLM classification if pipeline is unavailable or returns nothing.
 
         Args:
             axis: Axis configuration
@@ -299,12 +305,24 @@ class Categorizer:
             context: Results from previous axes
 
         Returns:
-            Category string from API
+            Category string
         """
-        # V2.0: Build prompt with DB rules if available
-        prompt = self._build_axis_prompt_with_db(axis, context)
         summaries_text = str(email_summaries)
 
+        # v3.3: Try local-first pipeline
+        if self.use_pipeline and self.pipeline:
+            axis_result = self.pipeline.classify_axis(
+                axis.name, summaries_text, context
+            )
+            if axis_result and axis_result.selected_tags:
+                logger.info(
+                    f"[{axis.name}] Pipeline: {axis_result.selected_tags} "
+                    f"(method={axis_result.method}, confidence={axis_result.confidence:.2f})"
+                )
+                return ', '.join(axis_result.selected_tags)
+
+        # Fallback: full LLM classification (existing behavior)
+        prompt = self._build_axis_prompt_with_db(axis, context)
         return self.api.call_paradigm(prompt, summaries_text)
 
     def _build_axis_prompt_with_db(self, axis: AxisConfig, context: Dict[str, str]) -> str:

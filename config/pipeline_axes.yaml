@@ -1,0 +1,111 @@
+# Pipeline classification configuration
+# Keywords, synonyms, regex patterns, scoring weights per axis
+#
+# Each axis defines:
+#   - keywords: tag_name -> list of {keyword, weight}
+#   - regex_patterns: list of {name, pattern, tag_name|tag_template, weight, flags}
+#   - scoring: thresholds and multipliers for heuristic decision
+#   - max_tags: maximum tags for this axis (null = unlimited)
+
+axes:
+  # ===== TYPE_MAIL =====
+  - name: type_mail
+    max_tags: 1
+    scoring:
+      keyword_weight_multiplier: 1.0
+      regex_weight_multiplier: 1.5
+      confidence_threshold: 0.75
+      ambiguity_margin: 0.2
+      min_hits_for_confidence: 2
+    keywords:
+      T_Projet:
+        - keyword: "projet"
+          weight: 1.0
+        - keyword: "avancement projet"
+          weight: 1.2
+        - keyword: "planning projet"
+          weight: 1.1
+      T_Qualite:
+        - keyword: "qualite"
+          weight: 1.0
+        - keyword: "non-conformite"
+          weight: 1.2
+        - keyword: "ncr"
+          weight: 1.0
+        - keyword: "quality"
+          weight: 0.8
+      T_Technique:
+        - keyword: "technique"
+          weight: 1.0
+        - keyword: "design"
+          weight: 0.9
+        - keyword: "conception"
+          weight: 0.9
+      T_Essais:
+        - keyword: "essais"
+          weight: 1.0
+        - keyword: "test"
+          weight: 0.9
+        - keyword: "campagne"
+          weight: 0.7
+      T_Fournisseur:
+        - keyword: "fournisseur"
+          weight: 1.0
+        - keyword: "sous-traitant"
+          weight: 1.0
+        - keyword: "supplier"
+          weight: 0.8
+      T_Anomalie:
+        - keyword: "anomalie"
+          weight: 1.0
+        - keyword: "defaut"
+          weight: 0.8
+        - keyword: "failure"
+          weight: 0.8
+    regex_patterns: []
+
+  # ===== EQUIPEMENT_DESIGNATION (regex-dominant) =====
+  - name: equipement_designation
+    max_tags: 3
+    scoring:
+      keyword_weight_multiplier: 1.0
+      regex_weight_multiplier: 2.0
+      confidence_threshold: 0.65
+      ambiguity_margin: 0.1
+      min_hits_for_confidence: 1
+    keywords:
+      EQ_PFM:
+        - keyword: "pfm"
+          weight: 1.0
+        - keyword: "proto flight model"
+          weight: 1.2
+      EQ_STM:
+        - keyword: "stm"
+          weight: 1.0
+        - keyword: "structural thermal model"
+          weight: 1.2
+      EQ_FM1:
+        - keyword: "fm1"
+          weight: 1.0
+        - keyword: "flight model 1"
+          weight: 1.2
+      EQ_FM2:
+        - keyword: "fm2"
+          weight: 1.0
+      EQ_CAM001:
+        - keyword: "cam001"
+          weight: 1.0
+      EQ_MV2:
+        - keyword: "mv2"
+          weight: 1.0
+    regex_patterns:
+      - name: "equipment_serial_CAM"
+        pattern: "\\b(CAM\\d{3,4})\\b"
+        tag_template: "EQ_{0}"
+        weight: 2.5
+        flags: "IGNORECASE"
+      - name: "model_designation"
+        pattern: "\\b(?:modele|model|S/N|SN|serial)\\s*:?\\s*([A-Z]{2,4}\\d{1,4})\\b"
+        tag_template: "EQ_{0}"
+        weight: 2.0
+        flags: "IGNORECASE"

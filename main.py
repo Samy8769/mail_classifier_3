@@ -29,6 +29,9 @@ from mail_classifier.search_engine import SearchEngine
 from mail_classifier.banner import display_banner, display_help, display_short_help
 from mail_classifier import cli_commands
 
+# v3.3: Local-first classification pipeline
+from mail_classifier.classification_pipeline import ClassificationPipeline
+
 
 def create_parser():
     """Create argument parser with subcommands."""
@@ -314,6 +317,32 @@ def initialize_v2_components(config):
     return db, chunker, tag_manager, validator, vector_store, search_engine
 
 
+def initialize_pipeline(config, db, api_client):
+    """
+    Initialize v3.3 local-first classification pipeline if enabled.
+
+    Returns:
+        ClassificationPipeline or None
+    """
+    pipeline_cfg = getattr(config, 'pipeline', None)
+    if not isinstance(pipeline_cfg, dict):
+        return None
+    if not pipeline_cfg.get('enabled', False):
+        return None
+
+    config_file = pipeline_cfg.get('config_file', 'config/pipeline_axes.yaml')
+    try:
+        pipeline = ClassificationPipeline(
+            pipeline_config_path=config_file,
+            db=db,
+            api_client=api_client,
+        )
+        return pipeline
+    except Exception as e:
+        print(f"Warning: Pipeline initialization failed: {e}")
+        return None
+
+
 def cmd_classify(args, config):
     """Handle classify command."""
     try:
@@ -338,7 +367,10 @@ def cmd_classify(args, config):
         if args.no_validation:
             validator = None
 
-        # Initialize categorizer with v2.0 components
+        # v3.3: Initialize local-first pipeline
+        pipeline = initialize_pipeline(config, db, api_client)
+
+        # Initialize categorizer with v2.0 + v3.3 components
         categorizer = Categorizer(
             config,
             api_client,
@@ -346,7 +378,8 @@ def cmd_classify(args, config):
             db=db,
             chunker=chunker,
             validator=validator,
-            vector_store=vector_store
+            vector_store=vector_store,
+            pipeline=pipeline,
         )
         print("Components initialized.")
 
